@@ -1,0 +1,37 @@
+<% pageInfo = 'Change Password' %>
+
+<% include ./partials/header %>
+
+ <form action="/<%= username._id %>/username" method="POST">
+  <div class="ui dividing header">
+	<div class="field">
+		<div class="two fields">
+			<div class="field">
+				<label>Current Username</label>
+		        <input type="text" name="username" placeholder="username">
+			</div>
+		</div>
+	  </div>
+    </div>
+	 
+	  <div class="ui dividing header">
+	<div class="field">
+		<div class="two fields">
+			<div class="field">
+				<label>New Username</label>
+		        <input type="text" name="new_username" placeholder="new username">
+			</div>
+		</div>
+		
+	  </div>
+	
+    </div>
+	 
+	 <button>Submit</button>
+</form>
+
+
+<% include ./partials/footer %>
+
+
+

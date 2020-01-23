@@ -1,0 +1,39 @@
+<% pageInfo = "View Profile" %>
+
+
+<%  include ./partials/header %>
+
+
+<form class="ui form">
+	<% if(currentUser != 'undefined') { %>
+	<div>
+		<div class="ui dividing header">Name(s) </div>
+      <h4><%=currentUser.first_name + " " + currentUser.middle_name + " " + currentUser.last_name%></h4>
+</div>
+	
+     <div>
+		<div class="ui dividing header">Contact Info </div>
+      <h4><%=currentUser.street + " " + currentUser.town + " " + currentUser.city + " " + currentUser.region + " " + currentUser.country%></h4>
+     </div>
+	
+	<div>
+		<div class="ui dividing header">Identifier </div>
+      <h4><%=currentUser.studentId %></h4>
+     </div>
+	
+	<div>
+		<div class="ui dividing header">Personal Information </div>
+      <h4>Date Of Birth: <%=currentUser.day + "/" + currentUser.month + "/" + currentUser.year %></h4>
+     </div>
+	
+	
+	<div><a href="/<%= currentUser._id%>/edit">Edit</a></div>
+	
+  <a href="/studentportal">Go back</a>
+	<% } %>
+</form>
+
+
+<%  include ./partials/footer %>
+
+

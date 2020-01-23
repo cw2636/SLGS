@@ -1,0 +1,52 @@
+<!-- <% //pageInfo = 'sign up' %> --->
+
+<% //include ./partials/header %>
+
+<% pageInfo = 'Home' %>
+
+<html>
+<body>
+
+<link rel="stylesheet" href="/main.css">
+
+<div class="top-container">
+ <form class="ui form" action='/signup' method='POST'>
+    <div class="row">
+      <h2 style="text-align:center">Signup with Social Media or Manually</h2>
+      <div class="vl">
+        <span class="vl-innertext">or</span>
+      </div>
+
+      <div class="col">
+        <a href="/auth/facebook/signup" <% global.globalInt = 2 %> class="fb btn">
+          <i class="fa fa-facebook fa-fw"></i> Signup with Facebook
+        </a>
+        <a href="#" class="twitter btn">
+          <i class="fa fa-twitter fa-fw"></i> Signup with Twitter
+        </a>
+        <a href="#" class="google btn">
+          <i class="fa fa-google fa-fw"></i> Sign with Google+
+        </a>
+      </div>
+
+      <div class="col">
+        <div class="hide-md-lg">
+          <p>Or Sign up manually:</p>
+        </div>
+
+        <input type="text" name="username" placeholder="Username" required>
+        <input type="password" name="password" placeholder="Password" required>
+        <input type="submit" value="Login">
+      </div>
+
+    </div>
+  </form>
+</div>
+
+
+	</body>
+</html>
+
+
+
+<% //include ./partials/footer %>

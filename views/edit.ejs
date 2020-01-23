@@ -1,0 +1,86 @@
+<% pageInfo = "Register" %>
+
+
+<%  include ./partials/header %>
+
+<h1>
+   Welcome to the signup page
+</h1>
+
+
+<form class="ui form" action="/<%= currentUser._id%>?_method=PUT" method="POST">
+	<h4 class="ui dividing header">Address Information</h4>
+  <div class="field">
+    <label>Name</label>
+    <div class="three fields">
+      <div class="field">
+        <input type="text" name="studentInfo[first_name]" value="<%= currentUser.first_name %>">
+      </div>
+	   <div class="field">
+        <input type="text" name="studentInfo[middle_name]" value="<%= currentUser.middle_name %>">
+      </div>
+      <div class="field">
+        <input type="text" name="studentInfo[last_name]" value="<%= currentUser.last_name %>">
+      </div>
+    </div>
+  </div>
+  <div class="field">
+    <label>Address</label>
+    <div class="fields">
+      <div class="eight wide field">
+        <input type="text" name="studentInfo[street]" value="<%= currentUser.street %>">
+      </div>
+      <div class="four wide field">
+        <input type="text" name="studentInfo[town]" value="<%= currentUser.town %>">
+      </div>
+	  <div class="four wide field">
+        <input type="text" name="studentInfo[city]" value="<%= currentUser.city %>">
+      </div>
+    </div>
+  </div>
+  <div class="two fields">
+	  <div class="field">
+		  <div class="twelve wide field">
+			  <label>Region</label>
+			<input type="text" name="studentInfo[region]" value="<%= currentUser.region %>">
+		  </div>
+	  </div>
+    <div class="field">
+      <label>Country</label>
+      <input type="text" name="studentInfo[country] "value="<%= currentUser.country %>">
+	
+    </div>
+	  
+	</div>
+	
+	<div class="field">
+		<div class="twelve wide field">
+			<input type="number" name="studentInfo[studentId]" value="<%= currentUser.studentId %>">
+		</div>
+		
+	</div>
+	
+  <div class="field">
+     
+    <div class="six wide field">
+      <label>Date Of Birth </label>
+      <div class="three fields">
+		  <div class="field">
+			  <input type="number" name="studentInfo[day]" value="<%= currentUser.day %>">
+		  </div>
+        <div class="field">
+          <input type="text" name="studentInfo[month]" value="<%= currentUser.month %>">
+        </div>
+        <div class="field">
+          <input type="text" name="studentInfo[year]" value="<%= currentUser.year %>">
+        </div>
+      </div>
+    </div>
+  </div>
+  <button>Save</button>
+</form>
+
+
+<%  include ./partials/footer %>
+
+

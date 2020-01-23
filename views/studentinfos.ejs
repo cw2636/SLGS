@@ -1,0 +1,177 @@
+<% pageInfo = 'student portal' %>
+
+<% include ./partials/header %>
+
+<div class="ui raised very padded text container segment">
+	
+	<!-- <table class="ui very compact table">
+	 <div class="tr"></div>
+     <thead>
+     <tr>
+      <th>School Resources</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr>
+      <td><a href="#">Enrollment Services</a></td>
+    </tr>
+    <tr>
+      <td><a href="#">Learning Suite</a></td>
+    </tr>
+    <tr>
+      <td><a href="#">Books I need for classses</a></td>
+    </tr>
+		<tr>
+		<td><a href="/<%= student._id %>/classRegistration">Register for Classes</a></td>
+      </tr>
+    </tbody>	
+    <thead>
+     <tr>
+       <th>Personal Information</th>
+     </tr>
+    </thead>
+   <tbody>
+    <tr>
+      <td><a href="/<%= student._id %>">View Profile</a></td>
+    </tr>
+    <tr>
+      <td><a>Update my Personal Information</a></td>
+    </tr>
+    <tr>
+      <td><a>View Grades and Academic Progress</a></td>
+    </tr>
+	<tr>
+	<td><a>School Clubs</a></td>
+    </tr>
+  </tbody>
+		
+     <thead>
+    <tr>
+      <th>School Links</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><a>Grade Book</a><td>
+    </tr>
+    <tr>
+      <td><a>Guess Access</a></td>
+    </tr>
+    <tr>
+      <td><a>Alumni</a></td>
+    </tr>
+	<tr>
+	<td><a href="/<%= student._id %>/classRegistration">Register for Classes</a></td>
+    </tr>
+	<tr>
+    <td><a href="/<%= student._id %>/userAuth">Change Password and Security Questions</a></td>
+	</tr>
+    </tbody>
+  </table> -->
+	
+<table class="ui compact table">
+    <thead>
+     <tr>
+      <th class="tr"></th>
+    </tr>
+    </thead>
+    <thead>
+     <tr>
+      <th>School Resources</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr>
+      <td><a href="#">Enrollment Services</a></td>
+    </tr>
+    <tr>
+      <td><a href="#">Learning Suite</a></td>
+    </tr>
+    <tr>
+      <td><a href="#">Books I need for classses</a></td>
+    </tr>
+		<tr>
+		<td><a href="/<%= student._id %>/classRegistration">Register for Classes</a></td>
+      </tr>
+    <thead>
+     <tr>
+       <th>Personal Information</th>
+     </tr>
+    </thead>
+    <tr>
+      <td><a href="/<%= student._id %>">View Profile</a></td>
+    </tr>
+    <tr>
+      <td><a>Update my Personal Information</a></td>
+    </tr>
+    <tr>
+      <td><a>View Grades and Academic Progress</a></td>
+    </tr>
+	<tr>
+	<td><a>School Clubs</a></td>
+    </tr>
+  <thead>
+    <tr>
+      <th>School Links</th>
+    </tr>
+  </thead>
+   <tr>
+      <td><a>Guess Access</a></td>
+    </tr>
+    <tr>
+      <td><a>Guess Access</a></td>
+    </tr>
+    <tr>
+      <td><a>Alumni</a></td>
+    </tr>
+	<tr>
+	<td><a href="/<%= student._id %>/classRegistration">Register for Classes</a></td>
+    </tr>
+	<tr>
+    <td><a href="/<%= student._id %>/userAuth">Change Password and Security Questions</a></td>
+	</tr>
+  </tbody>
+</table>
+	
+	
+
+
+<div class="ui raised very padded text container segment p">
+	 <div class="ui block header p"></div>
+	  	<h1>Schedule</h1>
+	 <table class="ui single line table">
+  <thead>
+    <tr>
+      <th>Courses</th>
+      <th>Instructors</th>
+      <th>Time</th>
+      <th>Days</th>
+	  <th>Location</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% classArr.forEach(function(classes){ %>
+    <tr>
+      <td><%=classes.name%></td>
+      <td><%=classes.instructor%></td>
+      <td><%=classes.time%></td>
+      <td><%=classes.days_taught%></td>
+	  <td>Location</td>
+     </tr>
+	<% }); %>
+  </tbody>
+</table>
+
+	</div>
+</div>
+
+
+
+
+
+
+
+
+
+
+<% include ./partials/footer %>

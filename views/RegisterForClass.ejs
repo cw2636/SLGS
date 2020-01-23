@@ -1,0 +1,22 @@
+<% pageInfo = "Register for Classes" %>
+
+
+<%  include ./partials/header %>
+
+<div class="container">
+      <% classArr.forEach(function(classes){ %>
+	    <div class="ui dividing-header">
+		<h2><%= classes.name %></h2> 
+		<h3>
+			Taught by <%= classes.instructor %> on <%= classes.days_taught %> at <%= classes.time %>
+		</h3>
+	</div>
+	
+	<a href="/<%= user._id %>/addingClass" <% globalString = classes.name %>>Add Class</a>
+	
+	<% }); %>
+	
+</div>
+
+<%  include ./partials/footer %>
+
