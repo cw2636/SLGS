@@ -1,15 +1,13 @@
 import React, { useState, useMemo } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import PortalSidebar from '../../components/shared/PortalSidebar';
 import {
-    FaBullhorn, FaBook, FaCalendarAlt, FaVideo, FaLink, FaFilePdf,
+    FaHome, FaBullhorn, FaBook, FaCalendarAlt, FaVideo, FaLink, FaFilePdf,
     FaTasks, FaClipboardList, FaChevronDown, FaChevronUp, FaExternalLinkAlt,
     FaCheckCircle, FaPlus, FaArrowLeft, FaUsers, FaThumbtack, FaSave,
-    FaTrash, FaGraduationCap, FaPen, FaEyeSlash, FaEye, FaTimes,
+    FaTrash, FaGraduationCap, FaEyeSlash, FaEye,
 } from 'react-icons/fa';
-import { COURSES, MODULES, COURSE_ANNOUNCEMENTS, SUBMISSIONS } from '../../data/mockData';
-import { CLASS_ROSTER } from '../../data/mockData';
+import { COURSES, MODULES, COURSE_ANNOUNCEMENTS, SUBMISSIONS, CLASS_ROSTER } from '../../data/mockData';
 
 const fmtDate = d => new Date(d).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
 
@@ -127,49 +125,74 @@ export default function TeacherCourse() {
         setTimeout(() => setGradesSuccess(p => ({ ...p, [subId]: false })), 2500);
     };
 
+    // ── Course sidebar ──────────────────────────────────────
+    const CC = course?.color || '#1a4731';
+    const T_NAV = [
+        { id:'overview',      label:'Overview',          icon:<FaHome /> },
+        { id:'modules',       label:'Modules',           icon:<FaBook /> },
+        { id:'announcements', label:'Announcements',     icon:<FaBullhorn /> },
+        { id:'grades',        label:'Grade Assignments', icon:<FaGraduationCap /> },
+        { id:'students',      label:'Students',          icon:<FaUsers /> },
+    ];
+
     if (!course) return (
-        <div className="portal-layout">
-            <PortalSidebar />
-            <div className="portal-main" style={{ display:'flex', alignItems:'center', justifyContent:'center' }}>
-                <div style={{ textAlign:'center' }}>
-                    <FaBook style={{ fontSize:'3rem', color:'var(--text-muted)', marginBottom:'1rem' }} />
-                    <h3>Course not found</h3>
-                    <Link to="/teacher/courses" style={{ color:'var(--gold)' }}>← My Courses</Link>
-                </div>
-            </div>
+        <div style={{ minHeight:'100vh', display:'flex', alignItems:'center', justifyContent:'center', background:'var(--bg)', flexDirection:'column', gap:'1rem' }}>
+            <FaBook style={{ fontSize:'3rem', color:'var(--text-muted)' }} />
+            <h3 style={{ color:'var(--text)' }}>Course not found</h3>
+            <Link to="/teacher/courses" style={{ color:'var(--gold)' }}>← My Courses</Link>
         </div>
     );
 
     return (
-        <div className="portal-layout">
-            <PortalSidebar />
-            <div className="portal-main">
-
-                {/* Header Banner */}
-                <div style={{ background: course.color, padding:'2rem 2rem 1.5rem', position:'relative', overflow:'hidden' }}>
-                    <div style={{ position:'absolute', top:0, right:0, bottom:0, width:'35%',
-                        background:'rgba(255,255,255,.04)', borderLeft:'1px solid rgba(255,255,255,.08)' }} />
-                    <Link to="/teacher/courses" style={{ color:'rgba(255,255,255,.7)', fontSize:'.85rem', display:'inline-flex', alignItems:'center', gap:'6px', marginBottom:'.75rem', textDecoration:'none' }}>
+        <div style={{ display:'flex', height:'100vh', overflow:'hidden', position:'fixed', inset:0, zIndex:999, background:'var(--bg)' }}>
+            {/* Course sidebar */}
+            <aside style={{ width:220, flexShrink:0, background:'#1c1c1e', borderRight:'1px solid rgba(255,255,255,.08)',
+                display:'flex', flexDirection:'column', minHeight:'100vh', overflowY:'auto' }}>
+                <div style={{ padding:'1.1rem 1rem .9rem', borderBottom:'1px solid rgba(255,255,255,.08)' }}>
+                    <div style={{ fontSize:'.7rem', color:'rgba(255,255,255,.45)', fontWeight:600, letterSpacing:'.08em', textTransform:'uppercase', marginBottom:'.3rem' }}>Instructor</div>
+                    <div style={{ fontSize:'.88rem', fontWeight:700, color:'#fff', lineHeight:1.3 }}>{course.title}</div>
+                    <div style={{ fontSize:'.72rem', color:'rgba(255,255,255,.45)', marginTop:'.25rem' }}>{course.code} · {course.form} {course.section}</div>
+                </div>
+                <nav style={{ padding:'.5rem 0', flex:1 }}>
+                    {T_NAV.map(n => (
+                        <button key={n.id} onClick={() => setTab(n.id)} style={{
+                            width:'100%', display:'flex', alignItems:'center', gap:'10px',
+                            padding:'.65rem 1.1rem', border:'none',
+                            background: tab===n.id ? CC : 'transparent',
+                            color: tab===n.id ? '#fff' : 'rgba(255,255,255,.65)',
+                            cursor:'pointer', fontSize:'.88rem', fontWeight: tab===n.id ? 700 : 500,
+                            textAlign:'left', transition:'background .15s',
+                            borderLeft: tab===n.id ? '3px solid rgba(255,255,255,.3)' : '3px solid transparent',
+                        }}>
+                            <span style={{ fontSize:'.9rem', flexShrink:0 }}>{n.icon}</span>{n.label}
+                        </button>
+                    ))}
+                </nav>
+                <div style={{ padding:'.75rem 1rem', borderTop:'1px solid rgba(255,255,255,.08)' }}>
+                    <Link to="/teacher/courses" style={{ display:'flex', alignItems:'center', gap:'7px', color:'rgba(255,255,255,.5)', fontSize:'.82rem', textDecoration:'none' }}>
                         <FaArrowLeft /> My Courses
                     </Link>
-                    <h1 style={{ fontFamily:"'Playfair Display',serif", fontSize:'1.8rem', color:'#fff', margin:'0 0 .3rem' }}>{course.title}</h1>
-                    <p style={{ color:'rgba(255,255,255,.75)', fontSize:'.9rem', margin:'0 0 .4rem' }}>
-                        {course.code} · {course.form} {course.section} · {course.credits} Credits
-                    </p>
-                    <p style={{ color:'rgba(255,255,255,.6)', fontSize:'.85rem', margin:0 }}>
-                        <FaCalendarAlt style={{ marginRight:'6px' }} />
-                        {course.schedule.map(s => `${s.day} ${s.time}`).join(' · ')}
-                    </p>
+                </div>
+            </aside>
+
+            {/* Main content */}
+            <div style={{ flex:1, display:'flex', flexDirection:'column', overflow:'hidden' }}>
+            <div style={{ flex:1, overflowY:'auto' }}>
+
+                {/* Header Banner */}
+                <div style={{ background: CC, padding:'1.5rem 2rem', position:'relative', overflow:'hidden', flexShrink:0 }}>
+                    <div style={{ position:'absolute', inset:0, background:'linear-gradient(135deg,rgba(0,0,0,.15) 0%,transparent 60%)' }} />
+                    <div style={{ position:'relative' }}>
+                        <h2 style={{ fontFamily:"'Playfair Display',serif", fontSize:'1.6rem', color:'#fff', margin:'0 0 .25rem' }}>{course.title}</h2>
+                        <p style={{ color:'rgba(255,255,255,.7)', fontSize:'.85rem', margin:0 }}>
+                            {course.code} · {course.form} {course.section} · {course.credits} Credits
+                            <span style={{ margin:'0 .6rem', opacity:.5 }}>·</span>
+                            <FaCalendarAlt style={{ marginRight:'5px' }} />{course.schedule.map(s=>`${s.day} ${s.time}`).join(' · ')}
+                        </p>
+                    </div>
                 </div>
 
-                {/* Tab Bar */}
-                <div style={{ borderBottom:'1px solid var(--border)', padding:'.75rem 2rem', display:'flex', gap:'.5rem', flexWrap:'wrap', background:'var(--bg-card)' }}>
-                    {[['overview','Overview'], ['modules','Modules'], ['announcements','Announcements'], ['grades','Grade Assignments'], ['students','Students']].map(([k,l]) => (
-                        <button key={k} onClick={() => setTab(k)} style={TAB_STYLE(tab === k)}>{l}</button>
-                    ))}
-                </div>
-
-                <div className="portal-content">
+                <div style={{ padding:'1.5rem 2rem' }}>
 
                     {/* ── OVERVIEW ── */}
                     {tab === 'overview' && (
@@ -564,6 +587,7 @@ export default function TeacherCourse() {
                     )}
 
                 </div>
+            </div>
             </div>
         </div>
     );
