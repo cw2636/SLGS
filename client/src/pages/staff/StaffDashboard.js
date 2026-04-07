@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
+import { useLocation } from 'react-router-dom';
 import PortalSidebar from '../../components/shared/PortalSidebar';
 import { FaIdCard, FaUsers, FaCheckCircle, FaPlus, FaClipboardList, FaBell, FaSearch } from 'react-icons/fa';
 import { MdPending } from 'react-icons/md';
@@ -16,12 +17,14 @@ const EMPTY_NEW = { name:'', form:'JSS 1', dob:'', guardian:'' };
 
 export default function StaffDashboard() {
     const { user } = useAuth();
+    const location = useLocation();
+    const urlTab   = new URLSearchParams(location.search).get('tab');
     const [admissions, setAdmissions] = useState(ADMITTED_STUDENTS);
     const [showForm, setShowForm]     = useState(false);
     const [newStudent, setNewStudent] = useState(EMPTY_NEW);
     const [issued, setIssued]         = useState(null);
     const [search, setSearch]         = useState('');
-    const [tab, setTab]               = useState('admissions'); // admissions | roster | enrolment
+    const [tab, setTab]               = useState(urlTab || 'admissions'); // admissions | roster | enrolment
 
     const students = USERS.filter(u => u.role === 'student');
     const pending  = admissions.filter(a => !a.registered);

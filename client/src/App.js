@@ -27,8 +27,12 @@ import StaffLogin     from './pages/staff/StaffLogin';
 import StaffDashboard from './pages/staff/StaffDashboard';
 
 // Principal
-import PrincipalLogin     from './pages/principal/PrincipalLogin';
-import PrincipalDashboard from './pages/principal/PrincipalDashboard';
+import PrincipalLogin         from './pages/principal/PrincipalLogin';
+import PrincipalDashboard     from './pages/principal/PrincipalDashboard';
+import PrincipalStudents      from './pages/principal/PrincipalStudents';
+import PrincipalTeachers      from './pages/principal/PrincipalTeachers';
+import PrincipalReports       from './pages/principal/PrincipalReports';
+import PrincipalAnnouncements from './pages/principal/PrincipalAnnouncements';
 
 export default function App() {
     return (
@@ -60,7 +64,11 @@ export default function App() {
                     <Route path="/staff/dashboard"   element={<ProtectedRoute role="staff"><StaffDashboard /></ProtectedRoute>} />
 
                     {/* Principal portal */}
-                    <Route path="/principal/dashboard" element={<ProtectedRoute role="principal"><PrincipalDashboard /></ProtectedRoute>} />
+                    <Route path="/principal/dashboard"     element={<ProtectedRoute role="principal"><PrincipalDashboard /></ProtectedRoute>} />
+                    <Route path="/principal/students"      element={<ProtectedRoute role="principal"><PrincipalStudents /></ProtectedRoute>} />
+                    <Route path="/principal/teachers"      element={<ProtectedRoute role="principal"><PrincipalTeachers /></ProtectedRoute>} />
+                    <Route path="/principal/reports"       element={<ProtectedRoute role="principal"><PrincipalReports /></ProtectedRoute>} />
+                    <Route path="/principal/announcements" element={<ProtectedRoute role="principal"><PrincipalAnnouncements /></ProtectedRoute>} />
 
                     {/* Fallback */}
                     <Route path="*" element={<Navigate to="/" replace />} />

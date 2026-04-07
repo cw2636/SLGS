@@ -23,18 +23,18 @@ const TEACHER_LINKS = [
 ];
 
 const STAFF_LINKS = [
-    { label: 'Dashboard',      path: '/staff/dashboard', icon: <FaTachometerAlt /> },
-    { label: 'Admissions',     path: '/staff/dashboard', icon: <FaIdCard /> },
-    { label: 'Student Roster', path: '/staff/dashboard', icon: <FaUsers /> },
-    { label: 'Class Enrolment',path: '/staff/dashboard', icon: <FaClipboardList /> },
+    { label: 'Dashboard',      path: '/staff/dashboard',             icon: <FaTachometerAlt /> },
+    { label: 'Admissions',     path: '/staff/dashboard?tab=admissions', icon: <FaIdCard /> },
+    { label: 'Student Roster', path: '/staff/dashboard?tab=roster',     icon: <FaUsers /> },
+    { label: 'Class Enrolment',path: '/staff/dashboard?tab=enrolment',  icon: <FaClipboardList /> },
 ];
 
 const PRINCIPAL_LINKS = [
-    { label: 'Dashboard',    path: '/principal/dashboard', icon: <FaTachometerAlt /> },
-    { label: 'Students',     path: '/principal/dashboard', icon: <FaUsers /> },
-    { label: 'Teachers',     path: '/principal/dashboard', icon: <FaChalkboard /> },
-    { label: 'Reports',      path: '/principal/dashboard', icon: <FaChartBar /> },
-    { label: 'Announcements',path: '/principal/dashboard', icon: <FaBell /> },
+    { label: 'Dashboard',    path: '/principal/dashboard',     icon: <FaTachometerAlt /> },
+    { label: 'Students',     path: '/principal/students',      icon: <FaUsers /> },
+    { label: 'Teachers',     path: '/principal/teachers',      icon: <FaChalkboard /> },
+    { label: 'Reports',      path: '/principal/reports',       icon: <FaChartBar /> },
+    { label: 'Announcements',path: '/principal/announcements', icon: <FaBell /> },
 ];
 
 const ROLE_LABELS = { student:'Student', teacher:'Teacher', staff:'Academic Staff', principal:'Principal' };
@@ -83,7 +83,7 @@ export default function PortalSidebar({ title, notifications = 0 }) {
                     {links.map(l => (
                         <div
                             key={l.path + l.label}
-                            className={`sb-link ${location.pathname === l.path ? 'act' : ''}`}
+                            className={`sb-link ${location.pathname === l.path.split('?')[0] && (!l.path.includes('?') || new URLSearchParams(l.path.split('?')[1] || '').get('tab') === new URLSearchParams(location.search).get('tab') || (l.label === 'Dashboard' && !new URLSearchParams(location.search).get('tab'))) ? 'act' : ''}`}
                             onClick={() => { navigate(l.path); setMobile(false); }}
                         >
                             {l.icon} {l.label}
