@@ -14,6 +14,7 @@ import StudentGrades  from './pages/student/StudentGrades';
 import StudentClasses from './pages/student/StudentClasses';
 import StudentProfile from './pages/student/StudentProfile';
 import StudentMessages from './pages/student/StudentMessages';
+import StudentFinance from './pages/student/StudentFinance';
 
 // Teacher
 import TeacherLogin     from './pages/teacher/TeacherLogin';
@@ -53,6 +54,7 @@ export default function App() {
                     <Route path="/student/classes"   element={<ProtectedRoute role="student"><StudentClasses /></ProtectedRoute>} />
                     <Route path="/student/profile"   element={<ProtectedRoute role="student"><StudentProfile /></ProtectedRoute>} />
                     <Route path="/student/messages"  element={<ProtectedRoute role="student"><StudentMessages /></ProtectedRoute>} />
+                    <Route path="/student/finance"   element={<ProtectedRoute role="student"><StudentFinance /></ProtectedRoute>} />
 
                     {/* Teacher portal */}
                     <Route path="/teacher/dashboard" element={<ProtectedRoute role="teacher"><TeacherDashboard /></ProtectedRoute>} />

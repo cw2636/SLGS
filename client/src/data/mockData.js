@@ -7,11 +7,11 @@ export const USERS = [
     // Students
     { id: 1, role: 'student', username: 'james.koroma', password: 'student123',
       name: 'James Koroma', email: 'james.koroma@slgs.edu.sl',
-      studentId: 'SLGS-240101', form: 'SS 3', house: 'Primus', dob: '2008-05-14',
+      studentId: 'SLGS-240101', form: 'SS 3', section: 'A', classSection: 'SS 3A', house: 'Primus', dob: '2008-05-14',
       phone: '+232 76 111 222', guardian: 'Mr. Abu Koroma', address: '12 Wilberforce St, Freetown' },
     { id: 2, role: 'student', username: 'aminata.sesay', password: 'student123',
       name: 'Aminata Sesay', email: 'aminata.sesay@slgs.edu.sl',
-      studentId: 'SLGS-240102', form: 'SS 2', house: 'Tertius', dob: '2009-02-22',
+      studentId: 'SLGS-240102', form: 'SS 2', section: 'B', classSection: 'SS 2B', house: 'Tertius', dob: '2009-02-22',
       phone: '+232 77 333 444', guardian: 'Mrs. Fatima Sesay', address: '5 Pademba Rd, Freetown' },
 
     // Teachers
@@ -226,4 +226,225 @@ export const gradeColor = (g) => {
     if (g === 'C')  return '#fdba74';
     return '#fca5a5';
 };
+
+// ── Class Sections ────────────────────────────────────────────
+// Each form (year group) is split into named sections (A, B, C)
+export const CLASS_SECTIONS = {
+    'JSS 1': ['JSS 1A', 'JSS 1B', 'JSS 1C'],
+    'JSS 2': ['JSS 2A', 'JSS 2B', 'JSS 2C'],
+    'JSS 3': ['JSS 3A', 'JSS 3B'],
+    'SS 1':  ['SS 1A',  'SS 1B'],
+    'SS 2':  ['SS 2A',  'SS 2B'],
+    'SS 3':  ['SS 3A',  'SS 3B'],
+};
+
+// Full class rosters keyed by section.
+// hasAccount=true means the student has a portal USERS entry.
+export const CLASS_ROSTER = {
+    'JSS 1A': [
+        { id:'R101', name:'Mariama Bangura',  house:'Secundus', hasAccount:false },
+        { id:'R102', name:'Fatima Cole',      house:'Primus',   hasAccount:false },
+        { id:'R103', name:'Abu Koroma Jr.',   house:'Quintus',  hasAccount:false },
+        { id:'R104', name:'Samuel Turay',     house:'Quartius', hasAccount:false },
+        { id:'R105', name:'Hawa Kargbo',      house:'Tertius',  hasAccount:false },
+        { id:'R106', name:'Emmanuel Conteh',  house:'Primus',   hasAccount:false },
+        { id:'R107', name:'Isata Sesay',      house:'Secundus', hasAccount:false },
+        { id:'R108', name:'Brima Kamara',     house:'Quintus',  hasAccount:false },
+    ],
+    'JSS 1B': [
+        { id:'R111', name:'Kadijah Fofanah',  house:'Tertius',  hasAccount:false },
+        { id:'R112', name:'Mohamed Koroma',   house:'Primus',   hasAccount:false },
+        { id:'R113', name:'Agnes Williams',   house:'Quartius', hasAccount:false },
+        { id:'R114', name:'David Palmer',     house:'Secundus', hasAccount:false },
+        { id:'R115', name:'Zainab Bangura',   house:'Quintus',  hasAccount:false },
+        { id:'R116', name:'Peter Turay',      house:'Primus',   hasAccount:false },
+        { id:'R117', name:'Aminata Koroma',   house:'Tertius',  hasAccount:false },
+    ],
+    'JSS 1C': [
+        { id:'R121', name:'Ibrahim Dumbuya',  house:'Secundus', hasAccount:false },
+        { id:'R122', name:'Fatmata Sesay',    house:'Quartius', hasAccount:false },
+        { id:'R123', name:'Joseph Bah',       house:'Quintus',  hasAccount:false },
+        { id:'R124', name:'Mary Kamara',      house:'Primus',   hasAccount:false },
+        { id:'R125', name:'Alieu Diallo',     house:'Tertius',  hasAccount:false },
+    ],
+    'JSS 2A': [
+        { id:'R201', name:'Sorie Kamara',     house:'Primus',   hasAccount:false },
+        { id:'R202', name:'Bintu Sesay',      house:'Secundus', hasAccount:false },
+        { id:'R203', name:'Abdulai Bangura',  house:'Tertius',  hasAccount:false },
+        { id:'R204', name:'Grace Koroma',     house:'Quartius', hasAccount:false },
+        { id:'R205', name:'Lansana Cole',     house:'Quintus',  hasAccount:false },
+        { id:'R206', name:'Kadija Kamara',    house:'Primus',   hasAccount:false },
+    ],
+    'JSS 2B': [
+        { id:'R211', name:'Daniel Williams',  house:'Secundus', hasAccount:false },
+        { id:'R212', name:'Fanta Turay',      house:'Tertius',  hasAccount:false },
+        { id:'R213', name:'John Fofanah',     house:'Quartius', hasAccount:false },
+        { id:'R214', name:'David Palmer Jr.', house:'Quintus',  hasAccount:false },
+        { id:'R215', name:'Sarah Williams',   house:'Primus',   hasAccount:false },
+    ],
+    'JSS 2C': [
+        { id:'R221', name:'Moses Conteh',     house:'Tertius',  hasAccount:false },
+        { id:'R222', name:'Agnes Kargbo',     house:'Primus',   hasAccount:false },
+        { id:'R223', name:'Abdul Sesay',      house:'Secundus', hasAccount:false },
+        { id:'R224', name:'Mariatu Koroma',   house:'Quintus',  hasAccount:false },
+    ],
+    'JSS 3A': [
+        { id:'R301', name:'Emmanuel Turay',   house:'Quartius', hasAccount:false },
+        { id:'R302', name:'Fatima Bangura',   house:'Tertius',  hasAccount:false },
+        { id:'R303', name:'Ibrahim Sesay',    house:'Secundus', hasAccount:false },
+        { id:'R304', name:'Sophie Kamara',    house:'Primus',   hasAccount:false },
+        { id:'R305', name:'Patrick Williams', house:'Quintus',  hasAccount:false },
+        { id:'R306', name:'Hawa Bangura',     house:'Quartius', hasAccount:false },
+        { id:'R307', name:'Alfred Koroma',    house:'Primus',   hasAccount:false },
+    ],
+    'JSS 3B': [
+        { id:'R311', name:'Ramatu Sesay',     house:'Tertius',  hasAccount:false },
+        { id:'R312', name:'Alie Turay',       house:'Secundus', hasAccount:false },
+        { id:'R313', name:'Fatmata Cole',     house:'Quintus',  hasAccount:false },
+        { id:'R314', name:'John Bangura',     house:'Primus',   hasAccount:false },
+        { id:'R315', name:'Mary Fofanah',     house:'Quartius', hasAccount:false },
+    ],
+    'SS 1A': [
+        { id:'R401', name:'Isatu Koroma',     house:'Primus',   hasAccount:false },
+        { id:'R402', name:'Amara Kamara',     house:'Secundus', hasAccount:false },
+        { id:'R403', name:'Fatima Sesay',     house:'Tertius',  hasAccount:false },
+        { id:'R404', name:'Brima Williams',   house:'Quartius', hasAccount:false },
+        { id:'R405', name:'Mary Cole',        house:'Quintus',  hasAccount:false },
+        { id:'R406', name:'Luke Bangura',     house:'Primus',   hasAccount:false },
+    ],
+    'SS 1B': [
+        { id:'R411', name:'Mohamed Conteh',   house:'Tertius',  hasAccount:false },
+        { id:'R412', name:'Abibatu Turay',    house:'Quintus',  hasAccount:false },
+        { id:'R413', name:'David Koroma',     house:'Secundus', hasAccount:false },
+        { id:'R414', name:'Sarah Bangura',    house:'Primus',   hasAccount:false },
+        { id:'R415', name:'Emmanuel Sesay',   house:'Quartius', hasAccount:false },
+    ],
+    'SS 2A': [
+        { id:'R501', name:'Sorie Williams',   house:'Quintus',  hasAccount:false },
+        { id:'R502', name:'Hawa Kamara',      house:'Primus',   hasAccount:false },
+        { id:'R503', name:'Patrick Sesay',    house:'Secundus', hasAccount:false },
+        { id:'R504', name:'Kadijah Turay',    house:'Tertius',  hasAccount:false },
+    ],
+    'SS 2B': [
+        { id:'2',    name:'Aminata Sesay',    house:'Tertius',  hasAccount:true,  studentId:'SLGS-240102', username:'aminata.sesay' },
+        { id:'R511', name:'Ibrahim Cole',     house:'Quartius', hasAccount:false },
+        { id:'R512', name:'Fatima Williams',  house:'Primus',   hasAccount:false },
+        { id:'R513', name:'Amara Bangura',    house:'Secundus', hasAccount:false },
+        { id:'R514', name:'Binta Kamara',     house:'Quintus',  hasAccount:false },
+    ],
+    'SS 3A': [
+        { id:'1',    name:'James Koroma',     house:'Primus',   hasAccount:true,  studentId:'SLGS-240101', username:'james.koroma' },
+        { id:'R601', name:'Mohamed Turay',    house:'Secundus', hasAccount:false },
+        { id:'R602', name:'Fatima Bangura',   house:'Quartius', hasAccount:false },
+        { id:'R603', name:'Ibrahim Kamara',   house:'Quintus',  hasAccount:false },
+        { id:'R604', name:'Mariama Cole',     house:'Tertius',  hasAccount:false },
+        { id:'R605', name:'Alie Sesay',       house:'Primus',   hasAccount:false },
+        { id:'R606', name:'Agnes Conteh',     house:'Secundus', hasAccount:false },
+        { id:'R607', name:'Samuel Bangura',   house:'Quartius', hasAccount:false },
+    ],
+    'SS 3B': [
+        { id:'R611', name:'Isatu Williams',   house:'Quintus',  hasAccount:false },
+        { id:'R612', name:'Modibo Fofanah',   house:'Primus',   hasAccount:false },
+        { id:'R613', name:'Fanta Koroma',     house:'Tertius',  hasAccount:false },
+        { id:'R614', name:'Brima Turay',      house:'Secundus', hasAccount:false },
+        { id:'R615', name:'Kadijah Sesay',    house:'Quartius', hasAccount:false },
+    ],
+};
+
+// ── Financial Accounts ────────────────────────────────────────
+// Managed by the Academic Secretary / Bursar
+// All amounts in Sierra Leone Leones (SLL)
+export const FINANCIAL_ACCOUNTS = {
+    'SLGS-240101': {
+        studentId:    'SLGS-240101',
+        studentName:  'James Koroma',
+        form:         'SS 3A',
+        termFee:       850000,
+        examFee:       250000,
+        labFee:         50000,
+        sportsFee:      40000,
+        otherFees:      30000,
+        totalCharged: 1220000,
+        totalPaid:     650000,
+        scholarshipApplied: 200000,
+        balance:       370000,   // still owed after aid applied
+        dueDate:      '2026-05-15',
+        term:         'Term 2, 2025/2026',
+        currency:     'SLL',
+        academicYear: '2025/2026',
+        status:       'outstanding',
+    },
+    'SLGS-240102': {
+        studentId:    'SLGS-240102',
+        studentName:  'Aminata Sesay',
+        form:         'SS 2B',
+        termFee:       850000,
+        examFee:         0,
+        labFee:         50000,
+        sportsFee:      40000,
+        otherFees:      30000,
+        totalCharged:  970000,
+        totalPaid:     970000,
+        scholarshipApplied: 450000, // bursary covered most
+        balance:         0,
+        dueDate:      '2026-05-15',
+        term:         'Term 2, 2025/2026',
+        currency:     'SLL',
+        academicYear: '2025/2026',
+        status:       'clear',
+    },
+};
+
+// ── Account Holds ─────────────────────────────────────────────
+// Placed by secretary. Prevents access to results/certificates.
+export const HOLDS = [
+    {
+        id: 1,
+        studentId:   'SLGS-240101',
+        type:        'Financial',
+        reason:      'Outstanding balance of SLL 370,000 for Term 2, 2025/2026',
+        placedBy:    'Ms. Patricia Johnson',
+        placedDate:  '2026-04-01',
+        resolvedDate: null,
+        active:       true,
+        consequence: 'Results withheld. Exam registration blocked until balance is cleared.',
+    },
+];
+
+// ── Payment Records ───────────────────────────────────────────
+export const PAYMENTS = [
+    { id:1, studentId:'SLGS-240101', amount:400000, method:'Bank Transfer (Guarantee Trust)', reference:'GT-20260110-881', date:'2026-01-10', recordedBy:'Ms. Patricia Johnson', description:'Term 2 partial payment — instalment 1' },
+    { id:2, studentId:'SLGS-240101', amount:250000, method:'Mobile Money (Orange Sierra Leone)', reference:'OM-20260215-447', date:'2026-02-15', recordedBy:'Ms. Patricia Johnson', description:'Term 2 partial payment — instalment 2' },
+    { id:3, studentId:'SLGS-240102', amount:970000, method:'Bank Transfer (Guarantee Trust)', reference:'GT-20260108-002', date:'2026-01-08', recordedBy:'Mr. Samuel Bangura', description:'Term 2 full payment' },
+    { id:4, studentId:'SLGS-240101', amount:350000, method:'Bank Transfer',                   reference:'GT-20250906-331', date:'2025-09-06', recordedBy:'Ms. Patricia Johnson', description:'Term 1 full payment' },
+    { id:5, studentId:'SLGS-240102', amount:900000, method:'Mobile Money (Africell)',          reference:'AF-20250905-112', date:'2025-09-05', recordedBy:'Mr. Samuel Bangura', description:'Term 1 full payment' },
+];
+
+// ── Financial Aid / Bursaries ─────────────────────────────────
+export const FINANCIAL_AID = [
+    {
+        id: 1,
+        studentId:    'SLGS-240101',
+        type:         'Merit Scholarship',
+        amount:        200000,
+        academicYear: '2025/2026',
+        status:       'Active',
+        description:  'Awarded for exceptional WASSCE performance — top 5% nationally. Applied directly to Term 2 fee.',
+        awardedBy:    'Principal — Rev. Canon Leonard Ken Davies',
+        awardedDate:  '2025-09-01',
+        renewable:     true,
+    },
+    {
+        id: 2,
+        studentId:    'SLGS-240102',
+        type:         'Welfare Bursary',
+        amount:        450000,
+        academicYear: '2025/2026',
+        status:       'Active',
+        description:  'Financial hardship bursary approved by the Welfare Committee. Covers 46% of Term 2 fees.',
+        awardedBy:    'Ms. Patricia Johnson — Academic Registrar',
+        awardedDate:  '2025-09-15',
+        renewable:     false,
+    },
+];
 

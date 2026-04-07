@@ -12,6 +12,7 @@ const STUDENT_LINKS = [
     { label: 'My Grades',    path: '/student/grades',   icon: <FaGraduationCap /> },
     { label: 'My Classes',   path: '/student/classes',  icon: <FaBook /> },
     { label: 'Messages',     path: '/student/messages', icon: <FaEnvelope /> },
+    { label: 'My Finance',   path: '/student/finance',  icon: <FaUserTie /> },
     { label: 'My Profile',   path: '/student/profile',  icon: <FaUser /> },
 ];
 
@@ -23,10 +24,11 @@ const TEACHER_LINKS = [
 ];
 
 const STAFF_LINKS = [
-    { label: 'Dashboard',      path: '/staff/dashboard',             icon: <FaTachometerAlt /> },
+    { label: 'Dashboard',      path: '/staff/dashboard',                icon: <FaTachometerAlt /> },
     { label: 'Admissions',     path: '/staff/dashboard?tab=admissions', icon: <FaIdCard /> },
     { label: 'Student Roster', path: '/staff/dashboard?tab=roster',     icon: <FaUsers /> },
     { label: 'Class Enrolment',path: '/staff/dashboard?tab=enrolment',  icon: <FaClipboardList /> },
+    { label: 'Student Finance',path: '/staff/dashboard?tab=finance',    icon: <FaUserTie /> },
 ];
 
 const PRINCIPAL_LINKS = [
