@@ -82,7 +82,7 @@ export default function TeacherMeetings() {
                                     <div key={m.id} className="mtg-card">
                                         <div className="mtg-card-head">
                                             <span className="mtg-badge upcoming">Upcoming</span>
-                                            <span style={{ fontSize:'.8rem', color:'var(--text-dim)' }}>{m.duration} min</span>
+                                            <span style={{ fontSize:'.8rem', color:'var(--text-dim)' }}>{m.duration}</span>
                                         </div>
                                         <h4 className="mtg-title">{m.title}</h4>
                                         <p className="mtg-meta"><FaCalendarAlt /> {m.date} at {m.time}</p>
@@ -110,7 +110,7 @@ export default function TeacherMeetings() {
                                     <div key={m.id} className="mtg-card" style={{ opacity:.7 }}>
                                         <div className="mtg-card-head">
                                             <span className="mtg-badge done">Completed</span>
-                                            <span style={{ fontSize:'.8rem', color:'var(--text-dim)' }}>{m.duration} min</span>
+                                            <span style={{ fontSize:'.8rem', color:'var(--text-dim)' }}>{m.duration}</span>
                                         </div>
                                         <h4 className="mtg-title">{m.title}</h4>
                                         <p className="mtg-meta"><FaCalendarAlt /> {m.date} at {m.time}</p>

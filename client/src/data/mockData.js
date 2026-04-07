@@ -22,10 +22,35 @@ export const USERS = [
       name: 'Mrs. Isatu Kamara', email: 'i.kamara@slgs.edu.sl',
       staffId: 'SLGS-T002', subject: 'English Language', qualification: 'M.A. English (USL)', experienceYears: 9 },
 
+    // Academic Staff (Secretaries / Registrar)
+    { id: 30, role: 'staff', username: 'ms.johnson', password: 'staff123',
+      name: 'Ms. Patricia Johnson', email: 'p.johnson@slgs.edu.sl',
+      staffId: 'SLGS-S001', department: 'Academic Registrar', title: 'Head of Records & Admissions' },
+    { id: 31, role: 'staff', username: 'mr.bangura', password: 'staff123',
+      name: 'Mr. Samuel Bangura', email: 's.bangura@slgs.edu.sl',
+      staffId: 'SLGS-S002', department: 'Admissions Office', title: 'Admissions Secretary' },
+
     // Principal
     { id: 20, role: 'principal', username: 'principal', password: 'principal123',
       name: 'Rev. Kenneth Davies', email: 'principal@slgs.edu.sl',
       title: 'School Principal', since: 2018 },
+];
+
+// ── Admitted Students Register ────────────────────────────────
+// Maintained by the Admissions Office. Each accepted student is issued an
+// Admission ID before they can create a portal account. The secretary
+// issues and manages this list.
+export const ADMITTED_STUDENTS = [
+    { admissionId: 'SLGS-ADM-2024-001', name: 'James Koroma',    form: 'SS 3', dob: '2008-05-14', guardian: 'Mr. Abu Koroma',       registered: true,  studentId: 'SLGS-240101' },
+    { admissionId: 'SLGS-ADM-2024-002', name: 'Aminata Sesay',   form: 'SS 2', dob: '2009-02-22', guardian: 'Mrs. Fatima Sesay',    registered: true,  studentId: 'SLGS-240102' },
+    { admissionId: 'SLGS-ADM-2025-001', name: 'Emmanuel Turay',  form: 'SS 1', dob: '2010-08-03', guardian: 'Mr. Charles Turay',    registered: false, studentId: null },
+    { admissionId: 'SLGS-ADM-2025-002', name: 'Kadija Kamara',   form: 'JSS 3', dob: '2011-01-17', guardian: 'Mrs. Hawa Kamara',   registered: false, studentId: null },
+    { admissionId: 'SLGS-ADM-2025-003', name: 'Ibrahim Sesay',   form: 'SS 2', dob: '2009-11-25', guardian: 'Mr. Sorie Sesay',     registered: false, studentId: null },
+    { admissionId: 'SLGS-ADM-2025-004', name: 'Mariama Bangura', form: 'JSS 1', dob: '2013-04-09', guardian: 'Mrs. AI Bangura',    registered: false, studentId: null },
+    { admissionId: 'SLGS-ADM-2025-005', name: 'Mohamed Koroma',  form: 'SS 3', dob: '2008-07-21', guardian: 'Mr. Brima Koroma',    registered: false, studentId: null },
+    { admissionId: 'SLGS-ADM-2026-001', name: 'Fatima Cole',     form: 'JSS 1', dob: '2014-03-15', guardian: 'Mr. John Cole',      registered: false, studentId: null },
+    { admissionId: 'SLGS-ADM-2026-002', name: 'David Palmer',    form: 'JSS 2', dob: '2012-09-08', guardian: 'Mrs. Agnes Palmer',  registered: false, studentId: null },
+    { admissionId: 'SLGS-ADM-2026-003', name: 'Sarah Williams',  form: 'SS 1', dob: '2010-06-12', guardian: 'Rev. Peter Williams', registered: false, studentId: null },
 ];
 
 // ── Subjects ─────────────────────────────────────────────────
@@ -149,7 +174,7 @@ export const NEWS = [
       category: 'Events' },
 ];
 
-// Grade helper
+// Grade helpers
 export const scoreToGrade = (score) => {
     if (score >= 90) return 'A*';
     if (score >= 80) return 'A';
@@ -159,11 +184,11 @@ export const scoreToGrade = (score) => {
     return 'F';
 };
 
-export const gradeColor = (grade) => {
-    if (grade === 'A*') return '#22c55e';
-    if (grade === 'A')  return '#84cc16';
-    if (grade === 'B')  return '#eab308';
-    if (grade === 'C')  return '#f97316';
-    if (grade === 'D')  return '#ef4444';
-    return '#6b7280';
+export const gradeColor = (g) => {
+    if (g === 'A*') return '#86efac';
+    if (g === 'A')  return '#bef264';
+    if (g === 'B')  return '#fde047';
+    if (g === 'C')  return '#fdba74';
+    return '#fca5a5';
 };
+

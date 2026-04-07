@@ -22,6 +22,10 @@ import TeacherGrades    from './pages/teacher/TeacherGrades';
 import TeacherMessages  from './pages/teacher/TeacherMessages';
 import TeacherMeetings  from './pages/teacher/TeacherMeetings';
 
+// Academic Staff
+import StaffLogin     from './pages/staff/StaffLogin';
+import StaffDashboard from './pages/staff/StaffDashboard';
+
 // Principal
 import PrincipalLogin     from './pages/principal/PrincipalLogin';
 import PrincipalDashboard from './pages/principal/PrincipalDashboard';
@@ -36,6 +40,7 @@ export default function App() {
                     <Route path="/student/login"     element={<StudentLogin />} />
                     <Route path="/student/signup"    element={<StudentSignup />} />
                     <Route path="/teacher/login"     element={<TeacherLogin />} />
+                    <Route path="/staff/login"       element={<StaffLogin />} />
                     <Route path="/principal/login"   element={<PrincipalLogin />} />
 
                     {/* Student portal */}
@@ -50,6 +55,9 @@ export default function App() {
                     <Route path="/teacher/grades"    element={<ProtectedRoute role="teacher"><TeacherGrades /></ProtectedRoute>} />
                     <Route path="/teacher/messages"  element={<ProtectedRoute role="teacher"><TeacherMessages /></ProtectedRoute>} />
                     <Route path="/teacher/meetings"  element={<ProtectedRoute role="teacher"><TeacherMeetings /></ProtectedRoute>} />
+
+                    {/* Academic staff portal */}
+                    <Route path="/staff/dashboard"   element={<ProtectedRoute role="staff"><StaffDashboard /></ProtectedRoute>} />
 
                     {/* Principal portal */}
                     <Route path="/principal/dashboard" element={<ProtectedRoute role="principal"><PrincipalDashboard /></ProtectedRoute>} />

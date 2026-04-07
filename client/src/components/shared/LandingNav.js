@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FaBars, FaTimes, FaUserGraduate, FaChalkboardTeacher } from 'react-icons/fa';
+import { FaBars, FaTimes, FaUserGraduate, FaChalkboardTeacher, FaUserTie } from 'react-icons/fa';
 import { MdAdminPanelSettings } from 'react-icons/md';
 import { FiChevronDown } from 'react-icons/fi';
 
@@ -76,6 +76,9 @@ export default function LandingNav() {
                             </button>
                             <button className="sb-link" style={{ border:'none', background:'none', padding:'.7rem 1rem', borderRadius:'var(--r-sm)', cursor:'pointer' }} onClick={() => { navigate('/teacher/login'); setPortal(false); }}>
                                 <FaChalkboardTeacher /> Teacher Portal
+                            </button>
+                            <button className="sb-link" style={{ border:'none', background:'none', padding:'.7rem 1rem', borderRadius:'var(--r-sm)', cursor:'pointer' }} onClick={() => { navigate('/staff/login'); setPortal(false); }}>
+                                <FaUserTie /> Academic Staff Portal
                             </button>
                             <button className="sb-link" style={{ border:'none', background:'none', padding:'.7rem 1rem', borderRadius:'var(--r-sm)', cursor:'pointer' }} onClick={() => { navigate('/principal/login'); setPortal(false); }}>
                                 <MdAdminPanelSettings /> Principal Portal

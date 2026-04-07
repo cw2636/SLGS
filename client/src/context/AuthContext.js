@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { USERS } from '../data/mockData';
+import { USERS, ADMITTED_STUDENTS } from '../data/mockData';
 
 const AuthContext = createContext(null);
 
@@ -29,19 +29,33 @@ export function AuthProvider({ children }) {
         return { ok: false, error: 'Invalid credentials. Please try again.' };
     };
 
-    const signup = (data) => {
-        // In a real app this would call an API. For the demo we just log in the new user.
+    // Verify a school-issued Admission ID before allowing signup
+    const verifyAdmissionId = (admissionId) => {
+        const record = ADMITTED_STUDENTS.find(
+            s => s.admissionId === admissionId.trim().toUpperCase()
+        );
+        if (!record) return { ok: false, error: 'Admission ID not found. Please contact the Admissions Office.' };
+        if (record.registered) return { ok: false, error: 'An account already exists for this Admission ID. Please log in.' };
+        return { ok: true, record };
+    };
+
+    const signup = (data, admissionRecord) => {
         const newUser = {
             id: Date.now(),
             role: 'student',
             username: data.username,
-            name: `${data.firstName} ${data.lastName}`,
+            name: admissionRecord.name,
             email: data.email,
             studentId: `SLGS-${Date.now().toString().slice(-6)}`,
-            form: data.form || 'JSS 1',
+            form: admissionRecord.form,
             house: 'Johnson',
+            dob: admissionRecord.dob,
+            guardian: admissionRecord.guardian,
             photo: null,
         };
+        // Mark the admission record as registered (mutates in-memory list)
+        admissionRecord.registered = true;
+        admissionRecord.studentId  = newUser.studentId;
         setUser(newUser);
         localStorage.setItem('slgs_user', JSON.stringify(newUser));
         return { ok: true, user: newUser };
@@ -53,7 +67,7 @@ export function AuthProvider({ children }) {
     };
 
     return (
-        <AuthContext.Provider value={{ user, login, logout, signup }}>
+        <AuthContext.Provider value={{ user, login, logout, signup, verifyAdmissionId }}>
             {children}
         </AuthContext.Provider>
     );

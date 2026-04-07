@@ -4,7 +4,7 @@ import { useAuth } from '../../context/AuthContext';
 import {
     FaTachometerAlt, FaGraduationCap, FaBook, FaUser, FaEnvelope,
     FaChalkboard, FaPen, FaCalendarAlt, FaSignOutAlt, FaBars,
-    FaUniversity, FaChartBar, FaUsers, FaBell
+    FaUniversity, FaChartBar, FaUsers, FaBell, FaIdCard, FaClipboardList, FaUserTie
 } from 'react-icons/fa';
 
 const STUDENT_LINKS = [
@@ -22,6 +22,13 @@ const TEACHER_LINKS = [
     { label: 'Live Meetings',path: '/teacher/meetings', icon: <FaCalendarAlt /> },
 ];
 
+const STAFF_LINKS = [
+    { label: 'Dashboard',      path: '/staff/dashboard', icon: <FaTachometerAlt /> },
+    { label: 'Admissions',     path: '/staff/dashboard', icon: <FaIdCard /> },
+    { label: 'Student Roster', path: '/staff/dashboard', icon: <FaUsers /> },
+    { label: 'Class Enrolment',path: '/staff/dashboard', icon: <FaClipboardList /> },
+];
+
 const PRINCIPAL_LINKS = [
     { label: 'Dashboard',    path: '/principal/dashboard', icon: <FaTachometerAlt /> },
     { label: 'Students',     path: '/principal/dashboard', icon: <FaUsers /> },
@@ -30,7 +37,8 @@ const PRINCIPAL_LINKS = [
     { label: 'Announcements',path: '/principal/dashboard', icon: <FaBell /> },
 ];
 
-const LINK_MAP = { student: STUDENT_LINKS, teacher: TEACHER_LINKS, principal: PRINCIPAL_LINKS };
+const ROLE_LABELS = { student:'Student', teacher:'Teacher', staff:'Academic Staff', principal:'Principal' };
+const LINK_MAP = { student: STUDENT_LINKS, teacher: TEACHER_LINKS, staff: STAFF_LINKS, principal: PRINCIPAL_LINKS };
 
 export default function PortalSidebar({ title, notifications = 0 }) {
     const { user, logout } = useAuth();
@@ -92,7 +100,7 @@ export default function PortalSidebar({ title, notifications = 0 }) {
                     <div className="su-avatar">{initials}</div>
                     <div className="su-info">
                         <h4>{user?.name}</h4>
-                        <span>{user?.role}</span>
+                        <span>{ROLE_LABELS[user?.role] || user?.role}</span>
                     </div>
                     <FaSignOutAlt className="su-logout" onClick={handleLogout} title="Log out" />
                 </div>
