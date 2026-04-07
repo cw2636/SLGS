@@ -448,3 +448,134 @@ export const FINANCIAL_AID = [
     },
 ];
 
+
+// ============================================================
+// LMS — Course / Module Data
+// ============================================================
+
+// ── Courses (map subject id → course detail) ─────────────────
+export const COURSES = [
+    { id: 'MTH-SS3', subjectId: 1, code: 'MTH 301', title: 'Further Mathematics', form: 'SS 3', section: 'A',
+      teacherId: 'SLGS-T001', teacherName: 'Mr. David Conteh', credits: 4, color: '#1a4731',
+      description: 'Advanced calculus, statistics, mechanics and further pure mathematics in preparation for WASSCE.',
+      schedule: [{ day: 'Monday', time: '08:00 – 09:40' }, { day: 'Wednesday', time: '10:00 – 11:40' }, { day: 'Friday', time: '08:00 – 09:00' }],
+    },
+    { id: 'ENG-SS3', subjectId: 2, code: 'ENG 301', title: 'English Language', form: 'SS 3', section: 'A',
+      teacherId: 'SLGS-T002', teacherName: 'Mrs. Isatu Kamara', credits: 4, color: '#7c3aed',
+      description: 'Comprehension, essay writing, summary and advanced grammar for WASSCE.',
+      schedule: [{ day: 'Tuesday', time: '08:00 – 09:40' }, { day: 'Thursday', time: '10:00 – 11:00' }],
+    },
+    { id: 'MTH-SS2', subjectId: 1, code: 'MTH 201', title: 'Mathematics', form: 'SS 2', section: 'B',
+      teacherId: 'SLGS-T001', teacherName: 'Mr. David Conteh', credits: 4, color: '#1a4731',
+      description: 'Algebra, geometry, trigonometry and data handling.',
+      schedule: [{ day: 'Monday', time: '10:00 – 11:40' }, { day: 'Thursday', time: '08:00 – 09:00' }],
+    },
+    { id: 'ENG-SS2', subjectId: 2, code: 'ENG 201', title: 'English Language', form: 'SS 2', section: 'B',
+      teacherId: 'SLGS-T002', teacherName: 'Mrs. Isatu Kamara', credits: 4, color: '#7c3aed',
+      description: 'Reading, writing and grammar for SS 2 students.',
+      schedule: [{ day: 'Wednesday', time: '08:00 – 09:40' }, { day: 'Friday', time: '10:00 – 11:00' }],
+    },
+];
+
+// ── Modules (per course) ──────────────────────────────────────
+export const MODULES = [
+    // MTH-SS3
+    { id: 'm1', courseId: 'MTH-SS3', order: 1, title: 'Differentiation & Integration',
+      published: true,
+      items: [
+          { id: 'mi1', type: 'video',  title: 'Intro to Differentiation',   url: 'https://www.youtube.com/embed/rAof9Ld5sOg', duration: '18 min', published: true },
+          { id: 'mi2', type: 'link',   title: 'Khan Academy — Calculus',    url: 'https://www.khanacademy.org/math/calculus-1', published: true },
+          { id: 'mi3', type: 'file',   title: 'Week 1 Notes (PDF)',         url: '#', size: '1.2 MB', published: true },
+          { id: 'mi4', type: 'assignment', title: 'Problem Set 1 — Limits', dueDate: '2026-04-15', points: 20, published: true },
+      ],
+    },
+    { id: 'm2', courseId: 'MTH-SS3', order: 2, title: 'Statistics & Probability',
+      published: true,
+      items: [
+          { id: 'mi5', type: 'video',  title: 'Probability Distributions',  url: 'https://www.youtube.com/embed/6v7GhZCd1ko', duration: '22 min', published: true },
+          { id: 'mi6', type: 'file',   title: 'Statistics Reference Sheet', url: '#', size: '480 KB', published: true },
+          { id: 'mi7', type: 'assignment', title: 'Statistics Assignment 1', dueDate: '2026-04-22', points: 30, published: true },
+          { id: 'mi8', type: 'exam',   title: 'Mid-Term Exam (Stats)',      dueDate: '2026-05-02', points: 100, published: true },
+      ],
+    },
+    { id: 'm3', courseId: 'MTH-SS3', order: 3, title: 'Mechanics',
+      published: false,
+      items: [
+          { id: 'mi9',  type: 'video', title: 'Newton\'s Laws Recap',       url: 'https://www.youtube.com/embed/_LdTPuRz3v4', duration: '14 min', published: false },
+          { id: 'mi10', type: 'file',  title: 'Mechanics Notes Ch.1',       url: '#', size: '890 KB', published: false },
+      ],
+    },
+
+    // ENG-SS3
+    { id: 'm4', courseId: 'ENG-SS3', order: 1, title: 'Comprehension Skills',
+      published: true,
+      items: [
+          { id: 'mi11', type: 'link',  title: 'BBC Learning English',       url: 'https://www.bbc.co.uk/learningenglish', published: true },
+          { id: 'mi12', type: 'file',  title: 'Comprehension Passages Pack', url: '#', size: '2.1 MB', published: true },
+          { id: 'mi13', type: 'assignment', title: 'Comprehension Exercise 1', dueDate: '2026-04-18', points: 25, published: true },
+      ],
+    },
+    { id: 'm5', courseId: 'ENG-SS3', order: 2, title: 'Essay Writing',
+      published: true,
+      items: [
+          { id: 'mi14', type: 'video', title: 'Essay Structure Masterclass', url: 'https://www.youtube.com/embed/s-i-exQU4lE', duration: '27 min', published: true },
+          { id: 'mi15', type: 'assignment', title: 'Argumentative Essay Draft', dueDate: '2026-04-25', points: 40, published: true },
+          { id: 'mi16', type: 'exam',  title: 'Essay Mock Exam',            dueDate: '2026-05-05', points: 100, published: true },
+      ],
+    },
+
+    // MTH-SS2
+    { id: 'm6', courseId: 'MTH-SS2', order: 1, title: 'Algebra Fundamentals',
+      published: true,
+      items: [
+          { id: 'mi17', type: 'video', title: 'Linear & Quadratic Equations', url: 'https://www.youtube.com/embed/l3XzepN03KQ', duration: '20 min', published: true },
+          { id: 'mi18', type: 'assignment', title: 'Algebra Exercise A',      dueDate: '2026-04-16', points: 20, published: true },
+      ],
+    },
+
+    // ENG-SS2
+    { id: 'm7', courseId: 'ENG-SS2', order: 1, title: 'Reading & Vocabulary',
+      published: true,
+      items: [
+          { id: 'mi19', type: 'link',  title: 'Oxford Learner\'s Dictionary', url: 'https://www.oxfordlearnersdictionaries.com', published: true },
+          { id: 'mi20', type: 'assignment', title: 'Vocabulary Quiz 1',       dueDate: '2026-04-17', points: 15, published: true },
+      ],
+    },
+];
+
+// ── Course Announcements ──────────────────────────────────────
+export const COURSE_ANNOUNCEMENTS = [
+    { id: 'ca1', courseId: 'MTH-SS3', authorId: 'SLGS-T001', author: 'Mr. David Conteh',
+      title: 'Problem Set 1 Released',
+      body: 'Problem Set 1 on Limits and Differentiation is now available under Module 1. Please submit by 15 April. Any questions, bring them to Wednesday\'s class.',
+      date: '2026-04-05', pinned: true },
+    { id: 'ca2', courseId: 'MTH-SS3', authorId: 'SLGS-T001', author: 'Mr. David Conteh',
+      title: 'Mid-Term Exam — Syllabus & Format',
+      body: 'The mid-term will cover Modules 1 and 2 (Differentiation, Integration, Statistics). It will be 2 hours long, closed-book, worth 100 marks. Bring scientific calculators. No phones.',
+      date: '2026-04-03', pinned: false },
+    { id: 'ca3', courseId: 'ENG-SS3', authorId: 'SLGS-T002', author: 'Mrs. Isatu Kamara',
+      title: 'Welcome to English Language SS3',
+      body: 'Welcome back, SS3A! This term we focus on comprehension and essay technique for WASSCE. Please ensure you have the prescribed text "Things Fall Apart" by next week.',
+      date: '2026-03-31', pinned: true },
+    { id: 'ca4', courseId: 'ENG-SS3', authorId: 'SLGS-T002', author: 'Mrs. Isatu Kamara',
+      title: 'Essay Draft Submission Reminder',
+      body: 'Your argumentative essay draft is due 25 April. Submit in class or email to i.kamara@slgs.edu.sl. Late submissions will be penalised 5 marks per day.',
+      date: '2026-04-06', pinned: false },
+    { id: 'ca5', courseId: 'MTH-SS2', authorId: 'SLGS-T001', author: 'Mr. David Conteh',
+      title: 'Algebra Exercise A Posted',
+      body: 'Algebra Exercise A is now live. Focus on solving quadratic equations using the formula method. Due 16 April.',
+      date: '2026-04-04', pinned: false },
+];
+
+// ── Assignment Submissions ────────────────────────────────────
+export const SUBMISSIONS = [
+    { id: 'sub1', itemId: 'mi4', courseId: 'MTH-SS3', studentId: 'SLGS-240101',
+      studentName: 'James Koroma', submittedAt: '2026-04-12 14:32', status: 'submitted',
+      grade: null, feedback: '', filePath: 'problem_set_1_james.pdf' },
+    { id: 'sub2', itemId: 'mi13', courseId: 'ENG-SS3', studentId: 'SLGS-240101',
+      studentName: 'James Koroma', submittedAt: '2026-04-16 09:10', status: 'graded',
+      grade: 21, feedback: 'Good work on inference questions. Work on conciseness in Q5.', filePath: '' },
+    { id: 'sub3', itemId: 'mi18', courseId: 'MTH-SS2', studentId: 'SLGS-240102',
+      studentName: 'Aminata Sesay', submittedAt: '2026-04-14 16:00', status: 'graded',
+      grade: 18, feedback: 'Excellent — full marks on factoring problems.', filePath: '' },
+];

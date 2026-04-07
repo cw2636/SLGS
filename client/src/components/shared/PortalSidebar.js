@@ -11,6 +11,7 @@ const STUDENT_LINKS = [
     { label: 'Dashboard',    path: '/student/dashboard', icon: <FaTachometerAlt /> },
     { label: 'My Grades',    path: '/student/grades',   icon: <FaGraduationCap /> },
     { label: 'My Classes',   path: '/student/classes',  icon: <FaBook /> },
+    { label: 'My Courses',   path: '/student/courses',  icon: <FaUniversity /> },
     { label: 'Messages',     path: '/student/messages', icon: <FaEnvelope /> },
     { label: 'My Finance',   path: '/student/finance',  icon: <FaUserTie /> },
     { label: 'My Profile',   path: '/student/profile',  icon: <FaUser /> },
@@ -18,6 +19,7 @@ const STUDENT_LINKS = [
 
 const TEACHER_LINKS = [
     { label: 'Dashboard',    path: '/teacher/dashboard', icon: <FaTachometerAlt /> },
+    { label: 'My Courses',   path: '/teacher/courses',  icon: <FaUniversity /> },
     { label: 'Enter Grades', path: '/teacher/grades',   icon: <FaPen /> },
     { label: 'Messages',     path: '/teacher/messages', icon: <FaEnvelope /> },
     { label: 'Live Meetings',path: '/teacher/meetings', icon: <FaCalendarAlt /> },
@@ -85,7 +87,13 @@ export default function PortalSidebar({ title, notifications = 0 }) {
                     {links.map(l => (
                         <div
                             key={l.path + l.label}
-                            className={`sb-link ${location.pathname === l.path.split('?')[0] && (!l.path.includes('?') || new URLSearchParams(l.path.split('?')[1] || '').get('tab') === new URLSearchParams(location.search).get('tab') || (l.label === 'Dashboard' && !new URLSearchParams(location.search).get('tab'))) ? 'act' : ''}`}
+                            className={(() => {
+                                const linkPath = l.path.split('?')[0];
+                                const exactMatch = location.pathname === linkPath;
+                                const prefixMatch = l.path.endsWith('/') === false && location.pathname.startsWith(linkPath + '/');
+                                const tabMatch = !l.path.includes('?') || new URLSearchParams(l.path.split('?')[1] || '').get('tab') === new URLSearchParams(location.search).get('tab') || (l.label === 'Dashboard' && !new URLSearchParams(location.search).get('tab'));
+                                return `sb-link ${(exactMatch || prefixMatch) && tabMatch ? 'act' : ''}`;
+                            })()}
                             onClick={() => { navigate(l.path); setMobile(false); }}
                         >
                             {l.icon} {l.label}
