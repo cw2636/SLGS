@@ -13,7 +13,7 @@ export default function Footer() {
                 {/* Brand */}
                 <div className="footer-brand">
                     <div style={{ display:'flex', alignItems:'center', gap:'10px', marginBottom:'.5rem' }}>
-                        <div className="nav-crest" style={{ width:'40px', height:'40px', fontSize:'.9rem' }}>Γ</div>
+                        <img src="/logo.png" alt="SLGS Logo" style={{ width:'52px', height:'52px', objectFit:'contain' }} />
                         <div>
                             <div style={{ fontFamily:"'Playfair Display',serif", fontWeight:800, fontSize:'1rem' }}>Sierra Leone Grammar School</div>
                             <div style={{ fontSize:'.7rem', color:'var(--text-muted)', letterSpacing:'1.5px', textTransform:'uppercase' }}>Murray Town, Freetown</div>

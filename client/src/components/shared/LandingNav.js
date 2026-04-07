@@ -48,7 +48,7 @@ export default function LandingNav() {
             <div className={`mob-overlay ${menuOpen ? 'op' : ''}`} onClick={() => setMenu(false)} />
             <nav className={`lnav ${scrolled ? 'sc' : ''}`}>
                 <div className="nav-brand-wrap" onClick={() => go('home')}>
-                    <div className="nav-crest">Γ</div>
+                    <img src="/logo.png" alt="SLGS Logo" className="nav-logo-img" />
                     <div className="nav-brand-text">
                         <h2>SLGS</h2>
                         <span>Est. 1845</span>

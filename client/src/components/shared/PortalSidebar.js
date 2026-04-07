@@ -70,7 +70,7 @@ export default function PortalSidebar({ title, notifications = 0 }) {
             <aside className={`portal-sidebar ${mobileOpen ? 'open' : ''}`}>
                 {/* Brand */}
                 <div className="sidebar-brand" onClick={() => navigate('/')}>
-                    <div className="sb-crest">Γ</div>
+                    <img src="/logo.png" alt="SLGS Logo" className="sb-logo-img" />
                     <div className="sb-name">
                         <h3>SLGS</h3>
                         <span>Est. 1845</span>
