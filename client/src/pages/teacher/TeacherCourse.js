@@ -488,6 +488,12 @@ export default function TeacherCourse() {
                                                         Submitted: {sub.submittedAt}
                                                         {sub.filePath && <span style={{ marginLeft:'10px', color:'#3b82f6' }}>📎 {sub.filePath}</span>}
                                                     </div>
+                                                    {sub.textContent && (
+                                                        <div style={{ marginTop:'.6rem', background:'var(--bg)', borderRadius:'var(--r)', padding:'.75rem 1rem', border:'1px solid var(--border)' }}>
+                                                            <div style={{ fontSize:'.72rem', fontWeight:700, color:'var(--text-muted)', textTransform:'uppercase', letterSpacing:'.05em', marginBottom:'.45rem' }}>Student's Written Submission</div>
+                                                            <pre style={{ margin:0, color:'var(--text)', fontSize:'.87rem', lineHeight:1.75, whiteSpace:'pre-wrap', fontFamily:'inherit' }}>{sub.textContent}</pre>
+                                                        </div>
+                                                    )}
                                                 </div>
                                                 <span style={{
                                                     padding:'.25rem .8rem', borderRadius:'999px', fontSize:'.78rem', fontWeight:700,

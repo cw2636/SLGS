@@ -571,13 +571,15 @@ export const COURSE_ANNOUNCEMENTS = [
 export const SUBMISSIONS = [
     { id: 'sub1', itemId: 'mi4', courseId: 'MTH-SS3', studentId: 'SLGS-240101',
       studentName: 'James Koroma', submittedAt: '2026-04-12 14:32', status: 'submitted',
-      grade: null, feedback: '', filePath: 'problem_set_1_james.pdf' },
+      grade: null, feedback: '', filePath: 'problem_set_1_james.pdf', textContent: '' },
     { id: 'sub2', itemId: 'mi13', courseId: 'ENG-SS3', studentId: 'SLGS-240101',
       studentName: 'James Koroma', submittedAt: '2026-04-16 09:10', status: 'graded',
-      grade: 21, feedback: 'Good work on inference questions. Work on conciseness in Q5.', filePath: '' },
+      grade: 21, feedback: 'Good work on inference questions. Work on conciseness in Q5.', filePath: '',
+      textContent: 'Logistic regression is a supervised learning method that models the probability of a binary outcome using the sigmoid function. Unlike linear regression, it predicts class labels (0 or 1) rather than continuous values. The sigmoid function maps any input to a value between 0 and 1, which is interpreted as a probability. If the probability exceeds 0.5, the model predicts class 1; otherwise class 0. Logistic regression assumes a linear relationship between features and the log-odds of the outcome.' },
     { id: 'sub3', itemId: 'mi18', courseId: 'MTH-SS2', studentId: 'SLGS-240102',
       studentName: 'Aminata Sesay', submittedAt: '2026-04-14 16:00', status: 'graded',
-      grade: 18, feedback: 'Excellent — full marks on factoring problems.', filePath: '' },
+      grade: 18, feedback: 'Excellent — full marks on factoring problems.', filePath: '',
+      textContent: 'Question 1: x² - 5x + 6 = 0 → (x-2)(x-3) = 0 → x = 2 or x = 3\nQuestion 2: 2x² + 7x + 3 = 0 → (2x+1)(x+3) = 0 → x = -1/2 or x = -3\nQuestion 3: x² - 9 = 0 → (x-3)(x+3) = 0 → x = 3 or x = -3' },
 ];
 
 // ── Course Discussions ────────────────────────────────────────
@@ -621,3 +623,109 @@ export const DISCUSSIONS = [
       replies: [],
     },
 ];
+
+// ── Assignment / Exam Details (descriptions, instructions) ────
+export const ASSIGNMENT_DETAILS = {
+    'mi4': {
+        description: 'Complete the following problems on limits and differentiation. Show all working clearly. Unsupported answers will not receive full marks.',
+        instructions: [
+            'Evaluate the limit: lim(x→2) (x² - 4) / (x - 2)',
+            'Find dy/dx for: y = 3x⁴ - 5x² + 7x - 2',
+            'Find the gradient of y = x³ at x = 2',
+            'A particle moves such that s = t³ - 6t² + 9t. Find its velocity and acceleration at t = 3.',
+            'Use the chain rule to differentiate: y = (2x³ + 1)⁵',
+        ],
+        allowText: true,
+        allowFile: true,
+        attachments: [],
+    },
+    'mi7': {
+        description: 'This assignment covers probability distributions covered in Module 2. Answer all five questions. Calculators are permitted.',
+        instructions: [
+            'A bag contains 5 red and 3 blue balls. Two balls are drawn without replacement. Find P(both red).',
+            'X follows a normal distribution with μ = 70 and σ = 10. Find P(X > 85).',
+            'The probability of rain on any day is 0.3. Find P(exactly 3 rainy days in a week).',
+            'Calculate the mean and variance of the distribution: X = 1(p=0.2), 2(p=0.3), 3(p=0.5).',
+            'Sketch a binomial distribution for n = 6, p = 0.4 and describe its shape.',
+        ],
+        allowText: true,
+        allowFile: true,
+        attachments: [],
+    },
+    'mi8': {
+        description: 'Mid-Term Examination covering Modules 1 and 2 (Differentiation, Integration, Statistics). Duration: 2 hours. Closed-book. Scientific calculators permitted. No phones.',
+        instructions: [
+            'Section A — Short Answer (40 marks): Answer ALL questions.',
+            'Section B — Structured Questions (60 marks): Answer ANY THREE of five questions.',
+            'All working must be clearly shown. State any theorems or rules used.',
+            'Write your Name and Student ID on the answer booklet.',
+        ],
+        allowText: false,
+        allowFile: true,
+        attachments: [],
+    },
+    'mi13': {
+        description: 'Read the passage provided below and answer all comprehension questions in full sentences. Answers must reflect close reading of the text.',
+        instructions: [
+            'Read the passage titled "The Niger Delta and Environmental Justice" carefully.',
+            'Q1 (5 marks): In your own words, explain why the author describes the situation as "an ecological emergency".',
+            'Q2 (5 marks): What techniques does the writer use to appeal to the reader\'s emotions? Give two examples.',
+            'Q3 (8 marks): Summarise the passage in no more than 80 words.',
+            'Q4 (7 marks): What is the writer\'s attitude towards multinational oil companies? How is it conveyed?',
+        ],
+        passage: 'The Niger Delta, once a pristine mosaic of rainforest and mangrove swamp, has become in the last five decades a symbol of corporate extraction without conscience. Oil spills, gas flares, and pipeline ruptures have poisoned water tables, destroyed fishing livelihoods, and forced communities into cycles of poverty they did not choose...',
+        allowText: true,
+        allowFile: false,
+        attachments: [],
+    },
+    'mi15': {
+        description: 'Write a well-structured argumentative essay on ONE of the following prompts. Your draft should demonstrate a clear thesis, supporting evidence, and awareness of counterarguments. Minimum 500 words.',
+        instructions: [
+            'Option A: "Social media does more harm than good for young people in West Africa." Argue for or against.',
+            'Option B: "Sierra Leone should prioritise technical and vocational education over university education." Argue for or against.',
+            'Option C: "The English language is a tool of empowerment, not colonial oppression." Evaluate this claim.',
+            'Structure: Introduction (thesis) → Body paragraphs (min. 3) → Counterargument + rebuttal → Conclusion.',
+            'Submit your draft — this will be returned with comments before the final submission.',
+        ],
+        allowText: true,
+        allowFile: true,
+        attachments: [],
+    },
+    'mi16': {
+        description: 'Mock Examination — English Language Paper 2: Essay Writing. Duration: 2.5 hours. Answer ONE question from each section.',
+        instructions: [
+            'Section A — Argumentative Essay (50 marks): Write 500–600 words.',
+            'Section B — Descriptive / Narrative Essay (50 marks): Write 450–550 words.',
+            'Plan your essays before writing. Mark your plan clearly in your answer booklet.',
+            'Marks are awarded for: Content & Ideas (40%), Organisation (30%), Language & Accuracy (30%).',
+        ],
+        allowText: false,
+        allowFile: true,
+        attachments: [],
+    },
+    'mi18': {
+        description: 'Solve the following algebra problems. Show all steps. Marks are awarded for method, not just the final answer.',
+        instructions: [
+            'Solve by factoring: x² - 5x + 6 = 0',
+            'Solve using the quadratic formula: 2x² + 7x + 3 = 0',
+            'Solve by difference of two squares: x² - 9 = 0',
+            'Expand and simplify: (x + 3)(x - 2) + (x + 1)²',
+            'If f(x) = x² - 4x + 3, find f(2) and the roots of f(x) = 0.',
+        ],
+        allowText: true,
+        allowFile: true,
+        attachments: [],
+    },
+    'mi20': {
+        description: 'Complete the vocabulary exercises below. Choose the best word from the box to fill each gap. Then write an original sentence using each word.',
+        instructions: [
+            'Word Bank: eloquent, ambiguous, perseverance, meticulous, candid, diligent, coherent, empathy',
+            'Part A: Fill in the gaps (8 questions, 1 mark each)',
+            'Part B: Write one original sentence for each word in the word bank (8 × 2 marks)',
+            'Refer to a dictionary if needed, but the sentences must be your own.',
+        ],
+        allowText: true,
+        allowFile: false,
+        attachments: [],
+    },
+};

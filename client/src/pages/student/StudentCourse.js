@@ -7,9 +7,9 @@ import {
     FaVideo, FaLink, FaFilePdf, FaClipboardList, FaPlay,
     FaChevronDown, FaChevronUp, FaExternalLinkAlt,
     FaCheckCircle, FaClock, FaExclamationCircle, FaThumbtack,
-    FaReply, FaChalkboardTeacher, FaPaperPlane,
+    FaReply, FaChalkboardTeacher, FaPaperPlane, FaUpload, FaFileAlt,
 } from 'react-icons/fa';
-import { COURSES, MODULES, COURSE_ANNOUNCEMENTS, SUBMISSIONS, DISCUSSIONS } from '../../data/mockData';
+import { COURSES, MODULES, COURSE_ANNOUNCEMENTS, SUBMISSIONS, DISCUSSIONS, ASSIGNMENT_DETAILS } from '../../data/mockData';
 
 // ── Helpers ──────────────────────────────────────────────────
 const fmtDate = d => new Date(d).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
@@ -49,6 +49,10 @@ export default function StudentCourse() {
     const [activeDisc, setActiveDisc] = useState(null);   // discussion id
     const [replyText, setReplyText]   = useState({});     // discId|replyId → text
     const [localDiscs, setLocalDiscs] = useState(null);   // patched after post
+    const [activeAssignment, setActiveAssignment] = useState(null);  // item object
+    const [prevPage, setPrevPage]   = useState('assignments');
+    const [subForms, setSubForms]   = useState({});  // itemId → {mode, text, fileName}
+    const [localSubs, setLocalSubs] = useState([]);  // in-session submissions
 
     const course = useMemo(() => COURSES.find(c => c.id === courseId), [courseId]);
     const modules = useMemo(() => MODULES.filter(m => m.courseId === courseId && m.published)
@@ -63,7 +67,7 @@ export default function StudentCourse() {
     const baseDiscs = useMemo(() => DISCUSSIONS.filter(d => d.courseId === courseId), [courseId]);
     const discussions = localDiscs !== null ? localDiscs : baseDiscs;
 
-    const mySubs = useMemo(() => SUBMISSIONS.filter(s => s.studentId === user?.studentId && s.courseId === courseId), [courseId, user]);
+    const mySubs = useMemo(() => [...SUBMISSIONS, ...localSubs].filter(s => s.studentId === user?.studentId && s.courseId === courseId), [courseId, user, localSubs]);
     const allItems = useMemo(() => modules.flatMap(m => m.items.filter(i => i.published)), [modules]);
     const upcoming = useMemo(() => allItems.filter(i => i.type === 'assignment' || i.type === 'exam')
         .sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate)), [allItems]);
@@ -93,6 +97,21 @@ export default function StudentCourse() {
             });
         });
         setReplyText(p => ({ ...p, [key]: '' }));
+    };
+
+    const submitAssignment = itemId => {
+        const form = subForms[itemId] || { mode: 'text', text: '', fileName: '' };
+        const content = form.mode === 'text' ? form.text : form.fileName;
+        if (!content.trim()) return;
+        const newSub = {
+            id: `sub_${Date.now()}`, itemId, courseId,
+            studentId: user?.studentId, studentName: user?.name,
+            submittedAt: new Date().toLocaleString(), status: 'submitted',
+            grade: null, feedback: '',
+            textContent: form.mode === 'text' ? form.text : '',
+            filePath:    form.mode === 'file' ? form.fileName : '',
+        };
+        setLocalSubs(p => [...p.filter(s => s.itemId !== itemId), newSub]);
     };
 
     // ── Course colour used throughout ─────────────────────────
@@ -133,7 +152,7 @@ export default function StudentCourse() {
             {/* Nav links */}
             <nav style={{ padding: '.5rem 0', flex: 1 }}>
                 {NAV.map(n => (
-                    <button key={n.id} onClick={() => { setPage(n.id); setActiveDisc(null); setSidebar(false); }} style={{
+                    <button key={n.id} onClick={() => { setPage(n.id); setActiveDisc(null); setActiveAssignment(null); setSidebar(false); }} style={{
                         width: '100%', display: 'flex', alignItems: 'center', gap: '10px',
                         padding: '.65rem 1.1rem', border: 'none', background: page === n.id ? CC : 'transparent',
                         color: page === n.id ? '#fff' : 'rgba(255,255,255,.65)',
@@ -289,12 +308,15 @@ export default function StudentCourse() {
                             {openModules[mod.id] && mod.items.filter(i=>i.published).map((item, idx) => {
                                 const sub = getSubForItem(item.id);
                                 return (
-                                    <div key={item.id} style={{
-                                        display:'flex', alignItems:'center', justifyContent:'space-between',
-                                        padding:'.7rem 1.25rem .7rem 2.5rem',
-                                        borderBottom: idx < mod.items.length-1 ? '1px solid var(--border)' : 'none',
-                                        background: idx%2===0 ? 'rgba(255,255,255,.012)' : 'transparent',
-                                    }}>
+                                    <div key={item.id}
+                                        onClick={(item.type==='assignment'||item.type==='exam') ? () => { setActiveAssignment(item); setPrevPage('modules'); } : undefined}
+                                        style={{
+                                            display:'flex', alignItems:'center', justifyContent:'space-between',
+                                            padding:'.7rem 1.25rem .7rem 2.5rem',
+                                            borderBottom: idx < mod.items.length-1 ? '1px solid var(--border)' : 'none',
+                                            background: idx%2===0 ? 'rgba(255,255,255,.012)' : 'transparent',
+                                            cursor: (item.type==='assignment'||item.type==='exam') ? 'pointer' : 'default',
+                                        }}>
                                         <div style={{ display:'flex', alignItems:'center', gap:'10px', flex:1 }}>
                                             <span>{ITEM_ICONS[item.type]}</span>
                                             <div style={{ flex:1 }}>
@@ -555,9 +577,9 @@ export default function StudentCourse() {
                     : upcoming.map(i => {
                         const sub = getSubForItem(i.id);
                         return (
-                            <div key={i.id} style={{ background:'var(--bg-card)', border:'1px solid var(--border)',
+                            <div key={i.id} onClick={() => setActiveAssignment(i)} style={{ background:'var(--bg-card)', border:'1px solid var(--border)',
                                 borderLeft: `4px solid ${i.type==='exam' ? 'var(--gold)' : CC}`,
-                                borderRadius:'var(--r)', padding:'1.25rem', marginBottom:'1rem',
+                                borderRadius:'var(--r)', padding:'1.25rem', marginBottom:'1rem', cursor:'pointer',
                                 display:'flex', justifyContent:'space-between', alignItems:'center', gap:'1rem' }}>
                                 <div>
                                     <div style={{ display:'flex', alignItems:'center', gap:'8px', marginBottom:'.3rem' }}>
@@ -677,6 +699,247 @@ export default function StudentCourse() {
         </>
     );
 
+    // ── ASSIGNMENT DETAIL PAGE ────────────────────────────────
+    const AssignmentDetailPage = () => {
+        const item = activeAssignment;
+        if (!item) return null;
+        const detail = (ASSIGNMENT_DETAILS || {})[item.id] || {};
+        const sub = getSubForItem(item.id);
+        const form = subForms[item.id] || { mode: 'text', text: '', fileName: '' };
+        const isGraded = sub?.status === 'graded';
+        const canResubmit = !!sub && !isGraded;
+        const backLabel = prevPage === 'modules' ? 'Modules' : 'Assignments';
+
+        return (
+            <>
+                <TopBar title={item.title} />
+                {/* Back nav */}
+                <div style={{ padding:'.6rem 1.5rem', borderBottom:'1px solid var(--border)', background:'var(--bg-card)', display:'flex', gap:'1rem', alignItems:'center', flexShrink:0 }}>
+                    <button onClick={() => { setActiveAssignment(null); setPage(prevPage); }} style={{
+                        background:'none', border:'1px solid var(--border)', borderRadius:'var(--r)',
+                        color:'var(--text-muted)', cursor:'pointer', padding:'.35rem .85rem', fontSize:'.82rem',
+                        display:'flex', alignItems:'center', gap:'6px' }}>
+                        <FaArrowLeft /> {backLabel}
+                    </button>
+                    <span style={{ fontSize:'.82rem', color:'var(--text-muted)' }}>
+                        {course.title} › {backLabel} › {item.title}
+                    </span>
+                </div>
+
+                <div style={{ padding:'1.5rem 2rem', display:'grid', gridTemplateColumns:'1fr 280px', gap:'1.75rem', alignItems:'start' }}>
+                    {/* ── Left column ── */}
+                    <div>
+                        {/* Title + meta */}
+                        <div style={{ marginBottom:'1.5rem' }}>
+                            <div style={{ display:'flex', alignItems:'center', gap:'10px', marginBottom:'.6rem' }}>
+                                {ITEM_ICONS[item.type]}
+                                <span style={{ fontSize:'.76rem', fontWeight:700, textTransform:'uppercase', letterSpacing:'.08em',
+                                    color: item.type==='exam' ? 'var(--gold)' : CC,
+                                    background: item.type==='exam' ? 'rgba(201,162,39,.12)' : `${CC}20`,
+                                    padding:'.18rem .55rem', borderRadius:'999px' }}>
+                                    {item.type==='exam' ? 'Exam' : 'Assignment'}
+                                </span>
+                            </div>
+                            <h1 style={{ fontFamily:"'Playfair Display',serif", fontSize:'1.6rem', margin:'0 0 .5rem', lineHeight:1.2 }}>{item.title}</h1>
+                            <div style={{ fontSize:'.85rem', color:'var(--text-muted)', display:'flex', gap:'1.25rem', flexWrap:'wrap' }}>
+                                <span>Due: {fmtDate(item.dueDate)}</span>
+                                <span style={{ fontWeight:700, color: isPast(item.dueDate) ? '#ef4444' : 'var(--gold)' }}>{daysLeft(item.dueDate)}</span>
+                                <span>{item.points} points</span>
+                            </div>
+                        </div>
+
+                        {/* Description */}
+                        <div style={{ background:'var(--bg-card)', border:'1px solid var(--border)', borderRadius:'var(--r)', padding:'1.25rem', marginBottom:'1.25rem' }}>
+                            <div style={{ fontWeight:700, fontSize:'.82rem', marginBottom:'.7rem', textTransform:'uppercase', letterSpacing:'.06em', color:'var(--text-muted)' }}>Description</div>
+                            <p style={{ color:'var(--text)', fontSize:'.92rem', lineHeight:1.85, margin:0, whiteSpace:'pre-line' }}>
+                                {detail.description || 'Complete this assignment as instructed. See your teacher for details.'}
+                            </p>
+                            {detail.passage && (
+                                <div style={{ borderLeft:`3px solid ${CC}`, marginTop:'1rem', background:`${CC}0a`, borderRadius:'0 var(--r) var(--r) 0', padding:'.75rem 1rem .75rem 1.25rem' }}>
+                                    <div style={{ fontSize:'.75rem', fontWeight:700, color:CC, marginBottom:'.5rem', textTransform:'uppercase', letterSpacing:'.06em' }}>Passage</div>
+                                    <p style={{ color:'var(--text-muted)', fontSize:'.88rem', lineHeight:1.85, margin:0, fontStyle:'italic' }}>{detail.passage}</p>
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Questions / Instructions */}
+                        {detail.instructions && detail.instructions.length > 0 && (
+                            <div style={{ background:'var(--bg-card)', border:'1px solid var(--border)', borderRadius:'var(--r)', padding:'1.25rem', marginBottom:'1.25rem' }}>
+                                <div style={{ fontWeight:700, fontSize:'.82rem', marginBottom:'.75rem', textTransform:'uppercase', letterSpacing:'.06em', color:'var(--text-muted)' }}>
+                                    Questions / Instructions
+                                </div>
+                                <ol style={{ margin:0, padding:'0 0 0 1.4rem', lineHeight:2 }}>
+                                    {detail.instructions.map((q, idx) => (
+                                        <li key={idx} style={{ color:'var(--text)', fontSize:'.9rem', paddingBottom:'.4rem',
+                                            borderBottom: idx < detail.instructions.length-1 ? '1px solid var(--border)' : 'none', marginBottom:'.4rem' }}>
+                                            {q}
+                                        </li>
+                                    ))}
+                                </ol>
+                            </div>
+                        )}
+
+                        {/* ── Submission area ── */}
+                        {isGraded ? (
+                            <div style={{ background:'rgba(34,197,94,.07)', border:'1px solid rgba(34,197,94,.25)', borderRadius:'var(--r)', padding:'1.25rem' }}>
+                                <div style={{ display:'flex', alignItems:'center', gap:'8px', fontWeight:700, color:'var(--green-light)', marginBottom:'.75rem' }}>
+                                    <FaCheckCircle /> Graded · {sub.grade}/{item.points} pts
+                                </div>
+                                {sub.feedback && <p style={{ color:'var(--text-muted)', fontSize:'.88rem', margin:'0 0 .75rem', lineHeight:1.7 }}>{sub.feedback}</p>}
+                                {sub.textContent && (
+                                    <div style={{ background:'var(--bg)', borderRadius:'var(--r)', padding:'.85rem 1rem', border:'1px solid var(--border)' }}>
+                                        <div style={{ fontSize:'.72rem', fontWeight:700, color:'var(--text-muted)', textTransform:'uppercase', letterSpacing:'.06em', marginBottom:'.5rem' }}>Your Submission</div>
+                                        <pre style={{ margin:0, color:'var(--text)', fontSize:'.88rem', lineHeight:1.75, whiteSpace:'pre-wrap', fontFamily:'inherit' }}>{sub.textContent}</pre>
+                                    </div>
+                                )}
+                                {sub.filePath && (
+                                    <div style={{ marginTop:'.75rem', display:'flex', alignItems:'center', gap:'8px', fontSize:'.88rem', color:'var(--text-muted)' }}>
+                                        <FaFileAlt style={{ color:'var(--gold)' }} /> {sub.filePath}
+                                    </div>
+                                )}
+                            </div>
+                        ) : canResubmit ? (
+                            <div style={{ background:'rgba(59,130,246,.07)', border:'1px solid rgba(59,130,246,.25)', borderRadius:'var(--r)', padding:'1.25rem', marginBottom:'1rem' }}>
+                                <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', flexWrap:'wrap', gap:'.75rem', marginBottom:'.75rem' }}>
+                                    <div style={{ display:'flex', alignItems:'center', gap:'8px', fontWeight:700, color:'#93c5fd' }}>
+                                        <FaClock /> Submitted · {sub.submittedAt}
+                                    </div>
+                                    <button onClick={() => setLocalSubs(p => p.filter(s => s.itemId !== item.id))} style={{
+                                        background:'rgba(255,255,255,.06)', border:'1px solid var(--border)', borderRadius:'var(--r)',
+                                        color:'var(--text-muted)', cursor:'pointer', padding:'.35rem .85rem', fontSize:'.82rem' }}>
+                                        Resubmit
+                                    </button>
+                                </div>
+                                {sub.textContent && (
+                                    <div style={{ background:'var(--bg)', borderRadius:'var(--r)', padding:'.85rem 1rem', border:'1px solid var(--border)' }}>
+                                        <div style={{ fontSize:'.72rem', fontWeight:700, color:'var(--text-muted)', textTransform:'uppercase', letterSpacing:'.06em', marginBottom:'.5rem' }}>Your Submission</div>
+                                        <pre style={{ margin:0, color:'var(--text)', fontSize:'.88rem', lineHeight:1.75, whiteSpace:'pre-wrap', fontFamily:'inherit' }}>{sub.textContent}</pre>
+                                    </div>
+                                )}
+                                {sub.filePath && (
+                                    <div style={{ marginTop:'.75rem', display:'flex', alignItems:'center', gap:'8px', fontSize:'.88rem', color:'var(--text-muted)' }}>
+                                        <FaFileAlt style={{ color:'var(--gold)' }} /> {sub.filePath}
+                                    </div>
+                                )}
+                            </div>
+                        ) : (
+                            <div style={{ background:'var(--bg-card)', border:'1px solid var(--border)', borderRadius:'var(--r)', padding:'1.25rem' }}>
+                                <div style={{ fontWeight:700, fontSize:'.9rem', marginBottom:'1rem' }}>
+                                    Submit {item.type==='exam' ? 'Exam' : 'Assignment'}
+                                </div>
+                                {/* Mode tabs */}
+                                {detail.allowText !== false && detail.allowFile !== false && (
+                                    <div style={{ display:'flex', gap:'8px', marginBottom:'1rem' }}>
+                                        <button onClick={() => setSubForms(p => ({ ...p, [item.id]: { ...(p[item.id]||{}), mode:'text' } }))} style={{
+                                            padding:'.38rem 1rem', borderRadius:'var(--r)', border:'1px solid var(--border)', cursor:'pointer', fontWeight:700, fontSize:'.82rem',
+                                            background: (form.mode||'text')==='text' ? CC : 'transparent',
+                                            color: (form.mode||'text')==='text' ? '#fff' : 'var(--text-muted)',
+                                            display:'flex', alignItems:'center', gap:'6px' }}>
+                                            <FaFileAlt /> Text Entry
+                                        </button>
+                                        <button onClick={() => setSubForms(p => ({ ...p, [item.id]: { ...(p[item.id]||{}), mode:'file' } }))} style={{
+                                            padding:'.38rem 1rem', borderRadius:'var(--r)', border:'1px solid var(--border)', cursor:'pointer', fontWeight:700, fontSize:'.82rem',
+                                            background: form.mode==='file' ? CC : 'transparent',
+                                            color: form.mode==='file' ? '#fff' : 'var(--text-muted)',
+                                            display:'flex', alignItems:'center', gap:'6px' }}>
+                                            <FaUpload /> Upload File
+                                        </button>
+                                    </div>
+                                )}
+                                {/* Text entry */}
+                                {(form.mode !== 'file' || detail.allowFile === false) && detail.allowText !== false && (
+                                    <textarea value={form.text || ''} rows={10}
+                                        onChange={e => setSubForms(p => ({ ...p, [item.id]: { ...(p[item.id]||{}), text: e.target.value } }))}
+                                        placeholder={`Type your ${item.type==='exam' ? 'answers' : 'submission'} here…`}
+                                        style={{ width:'100%', background:'var(--bg)', border:'1px solid var(--border)', borderRadius:'var(--r)',
+                                            padding:'.75rem 1rem', color:'var(--text)', fontSize:'.9rem', resize:'vertical',
+                                            boxSizing:'border-box', fontFamily:'inherit', lineHeight:1.75 }} />
+                                )}
+                                {/* File upload */}
+                                {form.mode === 'file' && detail.allowFile !== false && (
+                                    <label style={{ display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center',
+                                        border:`2px dashed ${form.fileName ? CC : 'var(--border)'}`, borderRadius:'var(--r)',
+                                        padding:'2.5rem 1.5rem', cursor:'pointer', gap:'10px',
+                                        background: form.fileName ? `${CC}0a` : 'transparent', transition:'border-color .2s' }}>
+                                        <FaUpload style={{ fontSize:'1.6rem', color: form.fileName ? CC : 'var(--text-muted)' }} />
+                                        <span style={{ fontWeight:700, fontSize:'.95rem', color: form.fileName ? CC : 'var(--text-muted)' }}>
+                                            {form.fileName || 'Click to choose a file'}
+                                        </span>
+                                        <span style={{ fontSize:'.78rem', color:'var(--text-muted)' }}>
+                                            {form.fileName ? 'File selected – click to change' : 'PDF, DOCX, JPG, PNG – up to 20 MB'}
+                                        </span>
+                                        <input type="file" style={{ display:'none' }} accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.txt"
+                                            onChange={e => setSubForms(p => ({ ...p, [item.id]: { ...(p[item.id]||{}), fileName: e.target.files[0]?.name || '' } }))} />
+                                    </label>
+                                )}
+                                <div style={{ display:'flex', alignItems:'center', gap:'1rem', marginTop:'1rem', flexWrap:'wrap' }}>
+                                    <button onClick={() => submitAssignment(item.id)} style={{
+                                        padding:'.6rem 1.5rem', borderRadius:'var(--r)', background: CC, color:'#fff',
+                                        border:'none', cursor:'pointer', fontWeight:700, fontSize:'.9rem',
+                                        display:'flex', alignItems:'center', gap:'8px',
+                                        opacity: ((form.mode !== 'file' && !form.text?.trim()) || (form.mode === 'file' && !form.fileName)) ? .45 : 1 }}>
+                                        <FaPaperPlane /> Submit {item.type==='exam' ? 'Exam' : 'Assignment'}
+                                    </button>
+                                    {isPast(item.dueDate) && (
+                                        <span style={{ fontSize:'.82rem', color:'#f87171', fontWeight:600 }}>
+                                            ⚠ Due date passed — this will count as late
+                                        </span>
+                                    )}
+                                </div>
+                            </div>
+                        )}
+                    </div>
+
+                    {/* ── Right sidebar ── */}
+                    <div style={{ display:'flex', flexDirection:'column', gap:'1rem' }}>
+                        <div style={{ background:'var(--bg-card)', border:'1px solid var(--border)', borderRadius:'var(--r)', padding:'1.25rem' }}>
+                            <div style={{ fontWeight:700, fontSize:'.8rem', color:'var(--text-muted)', textTransform:'uppercase', letterSpacing:'.06em', marginBottom:'.75rem' }}>
+                                Assignment Details
+                            </div>
+                            {[
+                                ['Due Date',  fmtDate(item.dueDate)],
+                                ['Points',    `${item.points} pts`],
+                                ['Type',      item.type==='exam' ? 'Examination' : 'Assignment'],
+                                ['Status',    !sub ? (isPast(item.dueDate) ? 'Missing' : 'Not Submitted') : sub.status==='graded' ? `Graded (${sub.grade}/${item.points})` : 'Submitted'],
+                            ].map(([label, val]) => (
+                                <div key={label} style={{ display:'flex', justifyContent:'space-between', alignItems:'center', padding:'.42rem 0',
+                                    borderBottom:'1px solid var(--border)', fontSize:'.85rem', gap:'.5rem' }}>
+                                    <span style={{ color:'var(--text-muted)' }}>{label}</span>
+                                    <span style={{ fontWeight:700,
+                                        color: label==='Status' && !sub && isPast(item.dueDate) ? '#ef4444'
+                                            : label==='Status' && sub?.status==='graded' ? 'var(--green-light)'
+                                            : label==='Status' && sub ? '#93c5fd'
+                                            : 'var(--text)' }}>{val}</span>
+                                </div>
+                            ))}
+                        </div>
+                        <div style={{ background:'var(--bg-card)', border:'1px solid var(--border)', borderRadius:'var(--r)', padding:'1.25rem' }}>
+                            <div style={{ fontWeight:700, fontSize:'.8rem', color:'var(--text-muted)', textTransform:'uppercase', letterSpacing:'.06em', marginBottom:'.75rem' }}>
+                                Allowed Formats
+                            </div>
+                            <div style={{ display:'flex', gap:'8px', flexWrap:'wrap' }}>
+                                {detail.allowText !== false && (
+                                    <span style={{ fontSize:'.78rem', padding:'.22rem .65rem', borderRadius:'999px',
+                                        background:'rgba(255,255,255,.06)', border:'1px solid var(--border)',
+                                        display:'flex', alignItems:'center', gap:'5px', color:'var(--text-muted)' }}>
+                                        <FaFileAlt style={{ fontSize:'.68rem' }} /> Text Entry
+                                    </span>
+                                )}
+                                {detail.allowFile && (
+                                    <span style={{ fontSize:'.78rem', padding:'.22rem .65rem', borderRadius:'999px',
+                                        background:'rgba(255,255,255,.06)', border:'1px solid var(--border)',
+                                        display:'flex', alignItems:'center', gap:'5px', color:'var(--text-muted)' }}>
+                                        <FaUpload style={{ fontSize:'.68rem' }} /> File Upload
+                                    </span>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </>
+        );
+    };
+
     const PAGES = { home: <HomePage />, modules: <ModulesPage />, announcements: <AnnouncementsPage />,
         discussions: <DiscussionsPage />, assignments: <AssignmentsPage />, grades: <GradesPage />, people: <PeoplePage /> };
 
@@ -687,7 +950,7 @@ export default function StudentCourse() {
                 <Sidebar />
                 <div style={{ flex:1, display:'flex', flexDirection:'column', overflow:'hidden' }}>
                     <div style={{ flex:1, overflowY:'auto' }}>
-                        {PAGES[page] || <HomePage />}
+                        {activeAssignment ? <AssignmentDetailPage /> : (PAGES[page] || <HomePage />)}
                     </div>
                 </div>
             </div>
