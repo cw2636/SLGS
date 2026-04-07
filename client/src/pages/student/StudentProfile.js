@@ -79,11 +79,11 @@ export default function StudentProfile() {
                             <div className="info-grid">
                                 {[
                                     { label:'School',       val: 'Sierra Leone Grammar School' },
-                                    { label:'Location',     val: 'Murray Town, Freetown' },
-                                    { label:'Diocese',      val: 'Anglican Diocese of Freetown' },
+                                    { label:'Location',     val: 'Murray Town, Freetown (50-acre campus)' },
+                                    { label:'School Day',   val: '08:10 – 15:15, Mon–Fri' },
                                     { label:'Current Term', val: 'Term 2, 2025/2026' },
-                                    { label:'Academic Year',val: '2025/2026' },
-                                    { label:'Founded',      val: '1845' },
+                                    { label:'Diocese',      val: 'Anglican Diocese of Freetown' },
+                                    { label:'Founded',      val: '25 March 1845' },
                                 ].map(({ label, val }) => (
                                     <div key={label} className="info-cell">
                                         <label>{label}</label>

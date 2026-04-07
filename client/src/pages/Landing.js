@@ -96,13 +96,17 @@ const WHY = [
 ];
 
 const ALUMNI = [
-    { name: 'James P. L. Davies', role: 'Nigerian Industrialist & Philanthropist' },
-    { name: 'Charles D.B. King', role: 'President of Liberia' },
-    { name: 'Modjaben Dowuona', role: 'Minister of Education, Ghana' },
-    { name: 'E.F.B. Forster', role: 'First Gambian Psychiatrist' },
-    { name: 'Thomas H. Jackson', role: 'Editor, Lagos Weekly Record' },
-    { name: 'Frans Dove', role: 'Barrister & Patron of Sports' },
-    { name: 'Many More Leaders', role: 'Across West Africa & Beyond' },
+    { name: 'James P. L. Davies',    role: 'Nigerian Industrialist & Philanthropist' },
+    { name: 'Charles D.B. King',     role: 'President of Liberia (1920–1930)' },
+    { name: 'Modjaben Dowuona',      role: 'Minister of Education, Ghana' },
+    { name: 'E.F.B. Forster',        role: 'First Gambian Psychiatrist' },
+    { name: 'Thomas H. Jackson',     role: 'Editor, Lagos Weekly Record' },
+    { name: 'Frans Dove',            role: 'Barrister & Patron of Sports' },
+    { name: 'UK Group — Regentonians', role: 'regentonians.org' },
+    { name: 'SLGSAANA West Coast',   role: 'slgsaana-westcoast.org' },
+    { name: 'SLGSAANA South East',   role: 'slgsaanase.org' },
+    { name: 'SLGSAANA Washington DC',role: 'slgsaanadc.org' },
+    { name: 'Thousands of Leaders',  role: 'Across West Africa & the Diaspora' },
 ];
 
 export default function Landing() {
@@ -323,7 +327,7 @@ export default function Landing() {
                             {[
                                 { icon:<FaMapMarkerAlt />, label:'Address', val:'Murray Town, Freetown, Western Area, Sierra Leone' },
                                 { icon:<FaEnvelope />, label:'Email', val:'info@slgs.edu.sl', href:'mailto:info@slgs.edu.sl' },
-                                { icon:<FaPhone />, label:'Phone', val:'+232 76 000 000', href:'tel:+23276000000' },
+                                { icon:<FaPhone />, label:'Phone', val:'+232 76 490 656', href:'tel:+23276490656' },
                             ].map((c, i) => (
                                 <div key={i} className="ci-item">
                                     <div className="ci-icon">{c.icon}</div>
@@ -338,6 +342,7 @@ export default function Landing() {
                                 <div style={{ display:'flex', flexDirection:'column', gap:'.6rem' }}>
                                     <button className="btn btn-primary btn-block btn-sm" onClick={() => navigate('/student/login')}>Student Login</button>
                                     <button className="btn btn-outline btn-block btn-sm" onClick={() => navigate('/teacher/login')}>Teacher Login</button>
+                                    <button className="btn btn-outline btn-block btn-sm" onClick={() => navigate('/staff/login')}>Staff Portal</button>
                                     <button className="btn btn-outline btn-block btn-sm" onClick={() => navigate('/principal/login')}>Principal Login</button>
                                 </div>
                             </div>

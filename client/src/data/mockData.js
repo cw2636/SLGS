@@ -7,11 +7,11 @@ export const USERS = [
     // Students
     { id: 1, role: 'student', username: 'james.koroma', password: 'student123',
       name: 'James Koroma', email: 'james.koroma@slgs.edu.sl',
-      studentId: 'SLGS-240101', form: 'SS 3', house: 'Johnson', dob: '2008-05-14',
+      studentId: 'SLGS-240101', form: 'SS 3', house: 'Primus', dob: '2008-05-14',
       phone: '+232 76 111 222', guardian: 'Mr. Abu Koroma', address: '12 Wilberforce St, Freetown' },
     { id: 2, role: 'student', username: 'aminata.sesay', password: 'student123',
       name: 'Aminata Sesay', email: 'aminata.sesay@slgs.edu.sl',
-      studentId: 'SLGS-240102', form: 'SS 2', house: 'Palmer', dob: '2009-02-22',
+      studentId: 'SLGS-240102', form: 'SS 2', house: 'Tertius', dob: '2009-02-22',
       phone: '+232 77 333 444', guardian: 'Mrs. Fatima Sesay', address: '5 Pademba Rd, Freetown' },
 
     // Teachers
@@ -32,8 +32,8 @@ export const USERS = [
 
     // Principal
     { id: 20, role: 'principal', username: 'principal', password: 'principal123',
-      name: 'Rev. Kenneth Davies', email: 'principal@slgs.edu.sl',
-      title: 'School Principal', since: 2018 },
+      name: 'Rev. Canon Leonard Ken Davies', email: 'principal@slgs.edu.sl',
+      title: 'School Principal', qualification: 'M.A. Th. & Min | M.A. Ed. | Dip. Th. | CELTA', since: 2018 },
 ];
 
 // ── Admitted Students Register ────────────────────────────────
@@ -146,16 +146,51 @@ export const ANNOUNCEMENTS = [
       body: 'The newly expanded school library is now open with 2,000 new titles. Students may borrow up to 3 books at a time.' },
 ];
 
+// ── Houses ───────────────────────────────────────────────────
+// Source: slgs.edu.sl/houses — the school has five houses
+export const HOUSES = [
+    { name: 'Primus',   motto: 'Primus inter pares',   color: '#ef4444', captain: 'Mohamed H. Mansaray' },
+    { name: 'Secundus', motto: 'Nulli secundus',        color: '#3b82f6', captain: 'TBC' },
+    { name: 'Tertius',  motto: 'Ter Felix',             color: '#22c55e', captain: 'Mohamed R. Thomas', houseTeacher: 'Mrs. Isabella Campbell' },
+    { name: 'Quartius', motto: 'Quartius fortiores',    color: '#f59e0b', captain: 'TBC',              houseTeacher: 'Miss Hawa Kargbo' },
+    { name: 'Quintus',  motto: 'Quintus',               color: '#8b5cf6', captain: 'Sylvanus M. Fannah', houseTeacher: 'Rev. Pinkney Wilhelm' },
+];
+
+// ── Alumni Associations ──────────────────────────────────────
+// Alumni are known as "Regentonians"
+export const ALUMNI_GROUPS = [
+    { name: 'Local Sierra Leone',      url: 'http://slgs.edu.sl/alumni-sl/' },
+    { name: 'UK — Regentonians',       url: 'http://www.regentonians.org/' },
+    { name: 'USA — West Coast',        url: 'https://slgsaana-westcoast.org/' },
+    { name: 'USA — South East',        url: 'https://slgsaanase.org/' },
+    { name: 'USA — Washington DC',     url: 'http://slgsaanadc.org/' },
+];
+
+// ── Clubs & Societies ──────────────────────────────────────────
+export const CLUBS = [
+    'School Choir', 'Interact Club (Community Service)', 'Science & Innovation Club',
+    'Scripture Union', 'Souls of Africa Youth Leadership (SOA)',
+    'Nature Club', 'UNESCO Club', 'Campus Peace Club',
+    'Benjamin Carson Reading Club', 'Regentonian News Journal', 'Integrity Club',
+];
+
+// ── Sports ───────────────────────────────────────────────────
+export const SPORTS = [
+    'Football', 'Basketball', 'Cricket', 'Volleyball', 'Squash', 'Hand Tennis', 'Table Tennis',
+];
+
 // ── Principal Stats ───────────────────────────────────────────
 export const SCHOOL_STATS = {
     totalStudents:  1240,
     totalTeachers:  68,
     totalStaff:     95,
     classrooms:     34,
+    campusAcres:    50,
     formsOffered:   ['JSS 1', 'JSS 2', 'JSS 3', 'SS 1', 'SS 2', 'SS 3'],
     passRate:       92.4,
     scholarships:   18,
     currentTerm:    'Term 2, 2025/2026',
+    schoolDay:      '08:10 – 15:15 (Assembly 08:10, Lessons 08:45)',
 };
 
 // ── News items ────────────────────────────────────────────────

@@ -48,7 +48,7 @@ export function AuthProvider({ children }) {
             email: data.email,
             studentId: `SLGS-${Date.now().toString().slice(-6)}`,
             form: admissionRecord.form,
-            house: 'Johnson',
+            house: admissionRecord.house || 'Primus',
             dob: admissionRecord.dob,
             guardian: admissionRecord.guardian,
             photo: null,

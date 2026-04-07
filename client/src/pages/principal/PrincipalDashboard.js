@@ -50,11 +50,11 @@ export default function PrincipalDashboard() {
                     <div className="dash-stats" style={{ marginBottom:'2rem' }}>
                         <div className="ds-card">
                             <div className="ds-icon green"><FaUsers /></div>
-                            <div className="ds-info"><h3>{SCHOOL_STATS.students.toLocaleString()}</h3><span>Total Students</span></div>
+                            <div className="ds-info"><h3>{SCHOOL_STATS.totalStudents.toLocaleString()}</h3><span>Total Students</span></div>
                         </div>
                         <div className="ds-card">
                             <div className="ds-icon blue"><FaChalkboardTeacher /></div>
-                            <div className="ds-info"><h3>{SCHOOL_STATS.teachers}</h3><span>Teaching Staff</span></div>
+                            <div className="ds-info"><h3>{SCHOOL_STATS.totalTeachers}</h3><span>Teaching Staff</span></div>
                         </div>
                         <div className="ds-card">
                             <div className="ds-icon gold"><FaTrophy /></div>

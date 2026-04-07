@@ -419,8 +419,8 @@ h1,h2,h3,h4,h5,h6 { font-family: 'Playfair Display', Georgia, serif; line-height
 .main-footer { background:#040d06; border-top:1px solid var(--border); padding:64px var(--px) 0; }
 .footer-grid {
   max-width:var(--max-w); margin:0 auto;
-  display:grid; grid-template-columns:2fr 1fr 1fr 1.4fr;
-  gap:4rem; padding-bottom:4rem; border-bottom:1px solid var(--border);
+  display:grid; grid-template-columns:2fr 1fr 1fr 1fr 1.4fr;
+  gap:3rem; padding-bottom:4rem; border-bottom:1px solid var(--border);
 }
 .footer-brand p { font-size:0.87rem; color:var(--text-muted); line-height:1.72; margin:1rem 0 1.5rem; max-width:270px; }
 .footer-motto { font-family:'Playfair Display',serif; font-style:italic; color:var(--gold-light); font-size:1.05rem; }

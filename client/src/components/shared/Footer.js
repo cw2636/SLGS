@@ -44,9 +44,21 @@ export default function Footer() {
                     <ul className="fl">
                         <li onClick={() => window.location.href = '/student/login'}>Student Portal</li>
                         <li onClick={() => window.location.href = '/teacher/login'}>Teacher Portal</li>
+                        <li onClick={() => window.location.href = '/staff/login'}>Academic Staff</li>
                         <li onClick={() => window.location.href = '/principal/login'}>Principal Portal</li>
                         <li onClick={() => scrollTo('contact')}>Admissions</li>
-                        <li onClick={() => scrollTo('contact')}>Alumni</li>
+                    </ul>
+                </div>
+
+                {/* Alumni */}
+                <div>
+                    <p className="ft">Alumni (Regentonians)</p>
+                    <ul className="fl">
+                        <li onClick={() => window.open('http://slgs.edu.sl/alumni-sl/', '_blank')}>Sierra Leone Chapter</li>
+                        <li onClick={() => window.open('http://www.regentonians.org/', '_blank')}>UK — Regentonians</li>
+                        <li onClick={() => window.open('https://slgsaana-westcoast.org/', '_blank')}>USA — West Coast</li>
+                        <li onClick={() => window.open('https://slgsaanase.org/', '_blank')}>USA — South East</li>
+                        <li onClick={() => window.open('http://slgsaanadc.org/', '_blank')}>USA — Washington DC</li>
                     </ul>
                 </div>
 
@@ -64,7 +76,7 @@ export default function Footer() {
                         </div>
                         <div className="ci-item">
                             <div className="ci-icon"><FaPhone /></div>
-                            <div className="ci-text"><h4>Phone</h4><p>+232 76 000 000</p></div>
+                            <div className="ci-text"><h4>Phone</h4><a href="tel:+23276490656">+232 76 490 656</a></div>
                         </div>
                     </div>
                 </div>
