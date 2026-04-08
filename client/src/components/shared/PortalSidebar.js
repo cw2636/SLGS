@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import ThemeToggle from './ThemeToggle';
 import {
     FaTachometerAlt, FaGraduationCap, FaBook, FaUser, FaEnvelope,
     FaChalkboard, FaPen, FaCalendarAlt, FaSignOutAlt, FaBars,
@@ -106,6 +107,9 @@ export default function PortalSidebar({ title, notifications = 0 }) {
                 </nav>
 
                 {/* User footer */}
+                <div style={{ padding:'.75rem 1rem', borderTop:'1px solid var(--border)' }}>
+                    <ThemeToggle compact />
+                </div>
                 <div className="sidebar-user">
                     <div className="su-avatar">{initials}</div>
                     <div className="su-info">

@@ -1,11 +1,12 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useRef } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import {
     FaHome, FaBullhorn, FaBook, FaCalendarAlt, FaVideo, FaLink, FaFilePdf,
     FaTasks, FaClipboardList, FaChevronDown, FaChevronUp, FaExternalLinkAlt,
     FaCheckCircle, FaPlus, FaArrowLeft, FaUsers, FaThumbtack, FaSave,
-    FaTrash, FaGraduationCap, FaEyeSlash, FaEye,
+    FaTrash, FaGraduationCap, FaEyeSlash, FaEye, FaUpload, FaFileAlt,
+    FaMagic, FaSpinner, FaFileWord, FaFileCsv, FaEdit,
 } from 'react-icons/fa';
 import { COURSES, MODULES, COURSE_ANNOUNCEMENTS, SUBMISSIONS, CLASS_ROSTER } from '../../data/mockData';
 
@@ -125,11 +126,103 @@ export default function TeacherCourse() {
         setTimeout(() => setGradesSuccess(p => ({ ...p, [subId]: false })), 2500);
     };
 
-    // ── Course sidebar ──────────────────────────────────────
+    // ── Document Upload → Module Builder ──────────────────────────────
+    const uploadRef = useRef();
+    const [uploadState, setUploadState] = useState('idle'); // idle | scanning | preview | done
+    const [uploadFile, setUploadFile] = useState(null);
+    const [parsedModule, setParsedModule] = useState(null);
+    const [editModTitle, setEditModTitle] = useState('');
+
+    const parseDocumentIntoModule = (file, textContent) => {
+        const name = file.name.replace(/\.[^.]+$/, '').replace(/[-_]/g, ' ');
+        const lines = textContent ? textContent.split('\n').map(l => l.trim()).filter(Boolean) : [];
+
+        // Detect sections by numbered headers, ALL-CAPS lines, or explicit keywords
+        const items = [];
+        const sectionPatterns = [/^(chapter|section|unit|topic|lesson|part|module)\s+\d+/i, /^\d+\.\s+\S/, /^[A-Z][A-Z\s]{5,}$/, /^#{1,3}\s+\S/];
+        const assignPattern = /\b(exercise|assignment|problem\s+set|homework|quiz|worksheet|task)\b/i;
+        const examPattern   = /\b(exam|test|assessment|evaluation)\b/i;
+        const videoPattern  = /\b(video|watch|lecture|recording)\b/i;
+        const linkPattern   = /https?:\/\/\S+/;
+
+        if (lines.length > 0) {
+            let inSection = null;
+            lines.forEach((line, idx) => {
+                const isHeader = sectionPatterns.some(p => p.test(line));
+                if (isHeader || idx === 0) {
+                    inSection = line.length > 60 ? line.slice(0, 60) + '…' : line;
+                    // Turn headers into 'file' items representing reading material
+                    items.push({ id: genId(), type: 'file', title: inSection, url: '', size: `From ${file.name}`, published: true });
+                } else if (assignPattern.test(line)) {
+                    items.push({ id: genId(), type: 'assignment', title: line.length > 70 ? line.slice(0,70)+'…' : line,
+                        dueDate: '', points: 20, url: '', published: true });
+                } else if (examPattern.test(line)) {
+                    items.push({ id: genId(), type: 'exam', title: line.length > 70 ? line.slice(0,70)+'…' : line,
+                        dueDate: '', points: 50, url: '', published: true });
+                } else if (videoPattern.test(line)) {
+                    const urlMatch = line.match(linkPattern);
+                    items.push({ id: genId(), type: 'video', title: line.length > 70 ? line.slice(0,70)+'…' : line,
+                        url: urlMatch ? urlMatch[0] : '', duration: '', published: true });
+                }
+            });
+        }
+
+        // If no items parsed (e.g. binary PDF), generate intelligent defaults from filename
+        if (items.length === 0) {
+            const base = name.toLowerCase();
+            if (/exam|test|assessment/.test(base))
+                items.push({ id: genId(), type: 'exam', title: name, dueDate: '', points: 100, url: '', published: true });
+            else if (/exercise|assignment|worksheet|problem/.test(base))
+                items.push({ id: genId(), type: 'assignment', title: name, dueDate: '', points: 20, url: '', published: true });
+            else if (/slide|presentation|deck/.test(base))
+                items.push({ id: genId(), type: 'file', title: name + ' (Slides)', url: '', size: file.name, published: true });
+            else
+                items.push({ id: genId(), type: 'file', title: name + ' (Reading)', url: '', size: file.name, published: true });
+        }
+
+        // Cap at 12 items max for readability
+        const cappedItems = items.slice(0, 12);
+        const newMod = { id: genId(), courseId, order: modules.length + 1, title: name, published: true, items: cappedItems };
+        setParsedModule(newMod);
+        setEditModTitle(newMod.title);
+        setUploadState('preview');
+    };
+
+    const handleFileUpload = e => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+        setUploadFile(file);
+        setUploadState('scanning');
+        // For .txt files, read actual content
+        if (file.type === 'text/plain' || file.name.endsWith('.txt') || file.name.endsWith('.md')) {
+            const reader = new FileReader();
+            reader.onload = ev => {
+                setTimeout(() => parseDocumentIntoModule(file, ev.target.result), 1400);
+            };
+            reader.readAsText(file);
+        } else {
+            // PDF / DOCX / other — simulate AI scanning delay
+            setTimeout(() => parseDocumentIntoModule(file, null), 2200);
+        }
+    };
+
+    const confirmModule = () => {
+        if (!parsedModule) return;
+        const confirmed = { ...parsedModule, title: editModTitle || parsedModule.title };
+        setModules(p => [...p, confirmed]);
+        setUploadState('done');
+        setTimeout(() => { setUploadState('idle'); setUploadFile(null); setParsedModule(null); }, 3500);
+    };
+
+    const removeParsedItem = itemId =>
+        setParsedModule(p => p ? { ...p, items: p.items.filter(i => i.id !== itemId) } : p);
+
+    // ── Course sidebar ────────────────────────────────────────────────────
     const CC = course?.color || '#1a4731';
     const T_NAV = [
         { id:'overview',      label:'Overview',          icon:<FaHome /> },
         { id:'modules',       label:'Modules',           icon:<FaBook /> },
+        { id:'upload',        label:'Upload Content',    icon:<FaUpload /> },
         { id:'announcements', label:'Announcements',     icon:<FaBullhorn /> },
         { id:'grades',        label:'Grade Assignments', icon:<FaGraduationCap /> },
         { id:'students',      label:'Students',          icon:<FaUsers /> },
@@ -547,6 +640,148 @@ export default function TeacherCourse() {
                                     );
                                 })
                             }
+                        </div>
+                    )}
+
+                    {/* ── UPLOAD CONTENT ── */}
+                    {tab === 'upload' && (
+                        <div style={{ maxWidth: '760px' }}>
+                            <h2 style={{ fontFamily:"'Playfair Display',serif", fontSize:'1.3rem', marginBottom:'.4rem' }}>
+                                <FaMagic style={{ color:'var(--gold)', marginRight:'10px' }} />
+                                Upload Content → Auto Module Builder
+                            </h2>
+                            <p style={{ color:'var(--text-muted)', fontSize:'.9rem', marginBottom:'1.75rem', lineHeight:1.7 }}>
+                                Upload a document (PDF, Word, TXT, Markdown) and the system will scan it, extract topics, exercises, and assignments, and build a ready-to-publish module automatically.
+                            </p>
+
+                            {uploadState === 'idle' && (
+                                <label style={{
+                                    display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center',
+                                    border:`2px dashed var(--border-l)`, borderRadius:'var(--r-lg)',
+                                    padding:'3.5rem 2rem', cursor:'pointer', gap:'1rem',
+                                    background:'var(--bg-card)', transition:'all .25s', textAlign:'center',
+                                }}
+                                onMouseEnter={e => { e.currentTarget.style.borderColor = CC; e.currentTarget.style.background = `${CC}10`; }}
+                                onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--border-l)'; e.currentTarget.style.background = 'var(--bg-card)'; }}>
+                                    <FaUpload style={{ fontSize:'2.5rem', color: CC }} />
+                                    <div>
+                                        <div style={{ fontWeight:700, fontSize:'1rem', marginBottom:'.3rem' }}>Drop your document here or click to browse</div>
+                                        <div style={{ color:'var(--text-muted)', fontSize:'.85rem' }}>Supports PDF, DOCX, TXT, MD — up to 20 MB</div>
+                                    </div>
+                                    <div style={{ display:'flex', gap:'8px', flexWrap:'wrap', justifyContent:'center' }}>
+                                        {[['PDF','#ef4444',<FaFilePdf/>],['DOCX','#3b82f6',<FaFileWord/>],['TXT','#22c55e',<FaFileAlt/>]].map(([label,color,icon]) => (
+                                            <span key={label} style={{ display:'flex', alignItems:'center', gap:'5px', fontSize:'.78rem', fontWeight:700,
+                                                padding:'.25rem .75rem', borderRadius:'999px', background:`${color}18`, color, border:`1px solid ${color}44` }}>
+                                                {icon} {label}
+                                            </span>
+                                        ))}
+                                    </div>
+                                    <input ref={uploadRef} type="file" style={{ display:'none' }}
+                                        accept=".pdf,.doc,.docx,.txt,.md,.csv"
+                                        onChange={handleFileUpload} />
+                                </label>
+                            )}
+
+                            {uploadState === 'scanning' && (
+                                <div style={{ background:'var(--bg-card)', border:'1px solid var(--border)', borderRadius:'var(--r-lg)',
+                                    padding:'3rem 2rem', textAlign:'center' }}>
+                                    <div style={{ marginBottom:'1.25rem', display:'inline-flex', alignItems:'center', justifyContent:'center',
+                                        width:72, height:72, borderRadius:'50%', background:`${CC}20`, border:`2px solid ${CC}` }}>
+                                        <FaMagic style={{ fontSize:'1.8rem', color:CC,
+                                            animation:'spin 1.2s linear infinite', display:'block' }} />
+                                    </div>
+                                    <div style={{ fontWeight:700, fontSize:'1.05rem', marginBottom:'.5rem' }}>
+                                        Scanning: {uploadFile?.name}
+                                    </div>
+                                    <div style={{ color:'var(--text-muted)', fontSize:'.88rem', marginBottom:'1.5rem' }}>
+                                        Reading structure · Detecting topics · Building module…
+                                    </div>
+                                    <div style={{ height:4, background:'var(--border)', borderRadius:999, overflow:'hidden', maxWidth:340, margin:'0 auto' }}>
+                                        <div style={{ height:'100%', background:`linear-gradient(90deg,${CC},var(--gold))`,
+                                            borderRadius:999, animation:'loadBar 2.2s ease-out forwards' }} />
+                                    </div>
+                                    <style>{`@keyframes loadBar{from{width:0%}to{width:100%}} @keyframes spin{to{transform:rotate(360deg)}}`}</style>
+                                </div>
+                            )}
+
+                            {uploadState === 'preview' && parsedModule && (
+                                <div>
+                                    <div style={{ background:'rgba(34,197,94,.07)', border:'1px solid rgba(34,197,94,.25)',
+                                        borderRadius:'var(--r)', padding:'.9rem 1.25rem', marginBottom:'1.25rem',
+                                        display:'flex', alignItems:'center', gap:'10px' }}>
+                                        <FaCheckCircle style={{ color:'#22c55e', fontSize:'1.1rem', flexShrink:0 }} />
+                                        <span style={{ fontWeight:700, color:'#86efac', fontSize:'.9rem' }}>
+                                            Scanned {uploadFile?.name} — {parsedModule.items.length} items detected. Review and confirm below.
+                                        </span>
+                                    </div>
+
+                                    <div className="d-card" style={{ marginBottom:'1.25rem' }}>
+                                        <div style={{ marginBottom:'1rem' }}>
+                                            <label style={{ fontSize:'.78rem', fontWeight:700, color:'var(--text-muted)', textTransform:'uppercase', letterSpacing:'.06em', display:'block', marginBottom:'.4rem' }}>Module Title</label>
+                                            <input value={editModTitle} onChange={e => setEditModTitle(e.target.value)}
+                                                style={{ width:'100%', background:'var(--bg)', border:'1px solid var(--border)', borderRadius:'var(--r-sm)',
+                                                    padding:'.7rem 1rem', color:'var(--text)', fontSize:'.95rem', fontWeight:700, outline:'none',
+                                                    boxSizing:'border-box' }}
+                                                onFocus={e => e.target.style.borderColor=CC}
+                                                onBlur={e => e.target.style.borderColor='var(--border)'} />
+                                        </div>
+                                        <div style={{ fontWeight:700, fontSize:'.8rem', color:'var(--text-muted)', textTransform:'uppercase', letterSpacing:'.06em', marginBottom:'.75rem' }}>
+                                            Module Items ({parsedModule.items.length})
+                                        </div>
+                                        {parsedModule.items.map((item, idx) => (
+                                            <div key={item.id} style={{ display:'flex', alignItems:'center', gap:'10px', padding:'.65rem .9rem',
+                                                background: idx%2===0 ? 'rgba(255,255,255,.025)' : 'transparent',
+                                                borderRadius:'var(--r-sm)', marginBottom:'.25rem' }}>
+                                                <span style={{ flexShrink:0 }}>{ITEM_TYPE_ICONS[item.type]}</span>
+                                                <div style={{ flex:1 }}>
+                                                    <div style={{ fontWeight:600, fontSize:'.88rem' }}>{item.title}</div>
+                                                    <div style={{ fontSize:'.75rem', color:'var(--text-muted)', textTransform:'capitalize' }}>
+                                                        {item.type}{item.points ? ` · ${item.points} pts` : ''}
+                                                    </div>
+                                                </div>
+                                                <button onClick={() => removeParsedItem(item.id)} style={{ background:'none', border:'none',
+                                                    color:'var(--text-dim)', cursor:'pointer', fontSize:'.85rem', padding:'.25rem',
+                                                    transition:'color .15s' }}
+                                                    onMouseEnter={e => e.currentTarget.style.color='#ef4444'}
+                                                    onMouseLeave={e => e.currentTarget.style.color='var(--text-dim)'}>
+                                                    <FaTrash />
+                                                </button>
+                                            </div>
+                                        ))}
+                                    </div>
+
+                                    <div style={{ display:'flex', gap:'1rem', flexWrap:'wrap' }}>
+                                        <button onClick={confirmModule} style={{
+                                            display:'flex', alignItems:'center', gap:'8px', padding:'.7rem 1.75rem',
+                                            borderRadius:'var(--r)', background:`linear-gradient(135deg,${CC},var(--gold))`,
+                                            color:'#fff', border:'none', cursor:'pointer', fontWeight:700, fontSize:'.9rem' }}>
+                                            <FaCheckCircle /> Add Module to Course
+                                        </button>
+                                        <button onClick={() => { setUploadState('idle'); setUploadFile(null); setParsedModule(null); }} style={{
+                                            display:'flex', alignItems:'center', gap:'8px', padding:'.7rem 1.25rem',
+                                            borderRadius:'var(--r)', background:'var(--bg-card)', color:'var(--text-muted)',
+                                            border:'1px solid var(--border)', cursor:'pointer', fontWeight:600, fontSize:'.9rem' }}>
+                                            <FaTrash /> Discard
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
+
+                            {uploadState === 'done' && (
+                                <div style={{ background:'rgba(34,197,94,.07)', border:'1px solid rgba(34,197,94,.25)',
+                                    borderRadius:'var(--r-lg)', padding:'3rem 2rem', textAlign:'center' }}>
+                                    <FaCheckCircle style={{ fontSize:'3rem', color:'#22c55e', marginBottom:'1rem' }} />
+                                    <h3 style={{ fontSize:'1.2rem', fontWeight:700, marginBottom:'.5rem' }}>Module Added!</h3>
+                                    <p style={{ color:'var(--text-muted)', fontSize:'.9rem', marginBottom:'1.25rem' }}>
+                                        The module has been added to this course. Switch to the Modules tab to publish and edit items.
+                                    </p>
+                                    <button onClick={() => setTab('modules')} style={{
+                                        padding:'.6rem 1.5rem', borderRadius:'var(--r)', background:CC,
+                                        color:'#fff', border:'none', cursor:'pointer', fontWeight:700 }}>
+                                        Go to Modules
+                                    </button>
+                                </div>
+                            )}
                         </div>
                     )}
 

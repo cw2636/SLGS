@@ -940,32 +940,45 @@ export default function StudentCourse() {
         );
     };
 
-    const PAGES = { home: <HomePage />, modules: <ModulesPage />, announcements: <AnnouncementsPage />,
-        discussions: <DiscussionsPage />, assignments: <AssignmentsPage />, grades: <GradesPage />, people: <PeoplePage /> };
+    // Call page renderers as plain functions (not <Component />) so React never
+    // unmounts them between parent re-renders – textarea focus is preserved.
+    const renderPage = () => {
+        if (activeAssignment) return AssignmentDetailPage();
+        switch (page) {
+            case 'home':          return HomePage();
+            case 'modules':       return ModulesPage();
+            case 'announcements': return AnnouncementsPage();
+            case 'discussions':   return DiscussionsPage();
+            case 'assignments':   return AssignmentsPage();
+            case 'grades':        return GradesPage();
+            case 'people':        return PeoplePage();
+            default:              return HomePage();
+        }
+    };
 
     return (
         <>
             {/* Full-window layout: fixed sidebar + scrollable main */}
             <div style={{ display:'flex', height:'100vh', overflow:'hidden', position:'fixed', inset:0, zIndex:999, background:'var(--bg)' }}>
-                <Sidebar />
+                {Sidebar()}
                 <div style={{ flex:1, display:'flex', flexDirection:'column', overflow:'hidden' }}>
                     <div style={{ flex:1, overflowY:'auto' }}>
-                        {activeAssignment ? <AssignmentDetailPage /> : (PAGES[page] || <HomePage />)}
+                        {renderPage()}
                     </div>
                 </div>
             </div>
 
-            {/* Video Modal */}
+            {/* Video Modal – iframe uses absolute positioning to eliminate gap artifact */}
             {videoModal && (
-                <div onClick={() => setVideoModal(null)} style={{ position:'fixed', inset:0, background:'rgba(0,0,0,.88)', zIndex:10000, display:'flex', alignItems:'center', justifyContent:'center' }}>
-                    <div onClick={e => e.stopPropagation()} style={{ width:'min(860px,95vw)', background:'#111', borderRadius:'var(--r)', overflow:'hidden', boxShadow:'0 20px 60px rgba(0,0,0,.6)' }}>
+                <div onClick={() => setVideoModal(null)} style={{ position:'fixed', inset:0, background:'rgba(0,0,0,.9)', zIndex:10000, display:'flex', alignItems:'center', justifyContent:'center' }}>
+                    <div onClick={e => e.stopPropagation()} style={{ width:'min(860px,95vw)', background:'#0a0a0a', borderRadius:'var(--r)', overflow:'hidden', boxShadow:'0 25px 70px rgba(0,0,0,.75)' }}>
                         <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', padding:'.75rem 1.25rem', borderBottom:'1px solid rgba(255,255,255,.1)' }}>
                             <span style={{ fontWeight:700, color:'#fff', fontSize:'.95rem' }}>{videoModal.title}</span>
-                            <button onClick={() => setVideoModal(null)} style={{ background:'none', border:'none', color:'rgba(255,255,255,.6)', cursor:'pointer', fontSize:'1.3rem' }}>✕</button>
+                            <button onClick={() => setVideoModal(null)} style={{ background:'none', border:'none', color:'rgba(255,255,255,.6)', cursor:'pointer', fontSize:'1.3rem', lineHeight:1 }}>✕</button>
                         </div>
-                        <div style={{ aspectRatio:'16/9' }}>
-                            <iframe src={videoModal.url} title={videoModal.title} width="100%" height="100%"
-                                style={{ border:'none', display:'block' }}
+                        <div style={{ position:'relative', paddingBottom:'56.25%', height:0, overflow:'hidden', background:'#000' }}>
+                            <iframe src={videoModal.url} title={videoModal.title}
+                                style={{ position:'absolute', top:0, left:0, width:'100%', height:'100%', border:'none', display:'block' }}
                                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen />
                         </div>
                     </div>
