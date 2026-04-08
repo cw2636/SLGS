@@ -5,14 +5,14 @@ export default function ThemeToggle({ compact = false }) {
     const { theme, setTheme } = useTheme();
     const [open, setOpen] = useState(false);
 
-    const currentTheme = THEMES[theme] || THEMES.dark;
+    const currentTheme = THEMES[theme] || THEMES.classic;
 
     const swatchColors = {
-        dark:     ['#070f09', '#1a4d2e', '#c9a227'],
-        light:    ['#f6f3ec', '#1a4d2e', '#a07a0a'],
-        ocean:    ['#060d18', '#0e3a5e', '#06b6d4'],
-        ember:    ['#0f0a04', '#7c2d12', '#f97316'],
-        midnight: ['#080810', '#2d1b6b', '#a78bfa'],
+        classic:   ['#F8F5EE', '#1B4D2E', '#8B6914'],
+        evening:   ['#060E09', '#1A4D2E', '#C9A227'],
+        chapel:    ['#03081A', '#0E3A6B', '#C9A227'],
+        governors: ['#0E0800', '#7C2D12', '#D97706'],
+        founders:  ['#08062A', '#2D1B6B', '#A78BFA'],
     };
 
     if (compact) {
