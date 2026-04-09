@@ -33,6 +33,10 @@ import TeacherCourse      from './pages/teacher/TeacherCourse';
 import StaffLogin     from './pages/staff/StaffLogin';
 import StaffDashboard from './pages/staff/StaffDashboard';
 
+// IT Content Manager
+import ITLogin     from './pages/it/ITLogin';
+import ITDashboard from './pages/it/ITDashboard';
+
 // Principal
 import PrincipalLogin         from './pages/principal/PrincipalLogin';
 import PrincipalDashboard     from './pages/principal/PrincipalDashboard';
@@ -54,6 +58,7 @@ export default function App() {
                         <Route path="/teacher/login"     element={<TeacherLogin />} />
                         <Route path="/staff/login"       element={<StaffLogin />} />
                         <Route path="/principal/login"   element={<PrincipalLogin />} />
+                        <Route path="/it/login"          element={<ITLogin />} />
 
                         {/* Student portal */}
                         <Route path="/student/dashboard" element={<ProtectedRoute role="student"><StudentDashboard /></ProtectedRoute>} />
@@ -75,6 +80,9 @@ export default function App() {
 
                         {/* Academic staff portal */}
                         <Route path="/staff/dashboard"   element={<ProtectedRoute role="staff"><StaffDashboard /></ProtectedRoute>} />
+
+                        {/* IT Content Manager */}
+                        <Route path="/it/dashboard" element={<ITDashboard />} />
 
                         {/* Principal portal */}
                         <Route path="/principal/dashboard"     element={<ProtectedRoute role="principal"><PrincipalDashboard /></ProtectedRoute>} />

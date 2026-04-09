@@ -194,6 +194,7 @@ export const SCHOOL_STATS = {
 };
 
 // ── News items ────────────────────────────────────────────────
+// These are defaults. IT admin can override via localStorage key 'slgs_it_news'
 export const NEWS = [
     {
         id: 1,
@@ -201,7 +202,7 @@ export const NEWS = [
         date: 'March 2025',
         summary: 'SLGS held its prestigious Speech and Prize Giving Day, honouring top performers with subject prizes, house awards, and the coveted Headmaster\'s Prize. Alumni, parents, and distinguished guests packed the hall in proud attendance of the school\'s finest tradition.',
         category: 'Events',
-        color: '#1B4D2E',
+        image: 'https://picsum.photos/seed/slgs-prize25/600/360',
     },
     {
         id: 2,
@@ -209,7 +210,7 @@ export const NEWS = [
         date: '25 March 2025',
         summary: 'SLGS marked its 180th founding anniversary with a solemn Thanksgiving Service at historic St George\'s Cathedral, Freetown — commemorating the day CMS opened Africa\'s first secondary school on 25 March 1845 under Rev. Thomas Peyton.',
         category: 'Anniversary',
-        image: 'https://upload.wikimedia.org/wikipedia/en/b/b4/Sierra_Leone_Grammar_School_shield.jpg',
+        image: 'https://picsum.photos/seed/slgs-founders25/600/360',
     },
     {
         id: 3,
@@ -217,7 +218,7 @@ export const NEWS = [
         date: 'November 2024',
         summary: 'SLGS students delivered exceptional results in the 2024 WAEC WASSCE examinations. Top achievers earned A grades across Biology, Chemistry, Physics, Mathematics and Literature — reinforcing the school\'s 180-year reputation as a national centre of excellence.',
         category: 'Achievement',
-        color: '#8B6914',
+        image: 'https://picsum.photos/seed/slgs-wassce24/600/360',
     },
     {
         id: 4,
@@ -225,7 +226,7 @@ export const NEWS = [
         date: 'January 2025',
         summary: 'Students, staff and Old Boys gathered at the historic St George\'s Cathedral, Freetown, for the annual Thanksgiving Service — a cherished Regentonian tradition rooted in the school\'s Anglican founding. The service opened the new academic year with prayer and reflection.',
         category: 'Faith & Tradition',
-        color: '#1565C0',
+        image: 'https://picsum.photos/seed/slgs-church25/600/360',
     },
     {
         id: 5,
@@ -233,7 +234,7 @@ export const NEWS = [
         date: 'February 2025',
         summary: 'The annual Inter-House Sports Day ignited fierce but friendly competition across all four houses. Track events, relay races, and field sports drew enthusiastic crowds, with students demonstrating the same spirit of discipline and excellence that defines life at SLGS.',
         category: 'Sports',
-        color: '#2D6A4F',
+        image: 'https://picsum.photos/seed/slgs-sports25/600/360',
     },
     {
         id: 6,
@@ -241,8 +242,21 @@ export const NEWS = [
         date: 'April 2025',
         summary: 'Founded in 1912, the SLGS marching band — one of the oldest in West Africa — performed at national independence celebrations. The band remains a proud emblem of the school\'s heritage, discipline, and cultural identity across generations of Regentonians.',
         category: 'Heritage',
-        color: '#4A1D96',
+        image: 'https://picsum.photos/seed/slgs-band25/600/360',
     },
+];
+
+// ── Events Gallery ────────────────────────────────────────────
+// Defaults. IT admin can override via localStorage key 'slgs_it_gallery'
+export const GALLERY_DEFAULT = [
+    { id: 1, title: 'Prize Giving & Speech Day', date: 'March 2025',   caption: 'Top students receive their awards at the annual ceremony', image: 'https://picsum.photos/seed/slgs-gal1/800/560' },
+    { id: 2, title: "Founders' Day Thanksgiving", date: '25 Mar 2025', caption: '180th anniversary celebrations at St George\'s Cathedral', image: 'https://picsum.photos/seed/slgs-gal2/800/560' },
+    { id: 3, title: 'Inter-House Sports Day',     date: 'Feb 2025',    caption: 'Students compete across all four houses in athletics',       image: 'https://picsum.photos/seed/slgs-gal3/800/560' },
+    { id: 4, title: 'WASSCE Top Achievers 2024',  date: 'Nov 2024',    caption: 'Class of 2024 excellence — outstanding national results',     image: 'https://picsum.photos/seed/slgs-gal4/800/560' },
+    { id: 5, title: 'Annual Thanksgiving Service',date: 'Jan 2025',    caption: 'Year-opening worship at St George\'s Cathedral, Freetown',   image: 'https://picsum.photos/seed/slgs-gal5/800/560' },
+    { id: 6, title: 'Independence Day Parade',    date: 'April 2025',  caption: 'The SLGS Marching Band at national independence celebrations', image: 'https://picsum.photos/seed/slgs-gal6/800/560' },
+    { id: 7, title: 'Science Fair 2025',          date: 'March 2025',  caption: 'Student innovations showcased at the annual science exhibition', image: 'https://picsum.photos/seed/slgs-gal7/800/560' },
+    { id: 8, title: 'Chapel Morning Service',     date: 'Feb 2025',    caption: 'Daily morning worship — Anglican values at the heart of SLGS',  image: 'https://picsum.photos/seed/slgs-gal8/800/560' },
 ];
 
 // Grade helpers
