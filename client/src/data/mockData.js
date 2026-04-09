@@ -195,18 +195,54 @@ export const SCHOOL_STATS = {
 
 // ── News items ────────────────────────────────────────────────
 export const NEWS = [
-    { id: 1, title: 'SLGS Tops National WASSCE Results', date: 'March 2026',
-      summary: 'Sierra Leone Grammar School achieved the highest aggregate pass rate in the country for the 2025 WASSCE examinations, with 97% of students obtaining 5+ credits.',
-      category: 'Achievement' },
-    { id: 2, title: 'New Science Laboratory Inaugurated', date: 'February 2026',
-      summary: 'The Bishop funded state-of-the-art science laboratory was officially opened by the Anglican Bishop of Freetown, significantly enhancing practical science education.',
-      category: 'Facilities' },
-    { id: 3, title: 'Model United Nations Delegation', date: 'January 2026',
-      summary: 'Ten SLGS students represented Sierra Leone at the West African Model United Nations conference in Accra, Ghana, returning with two awards for Best Delegate.',
-      category: 'Events' },
-    { id: 4, title: '181st Founders\' Day Celebrated', date: 'March 2026',
-      summary: 'The school marked 181 years of academic excellence with a special service at St. George\'s Cathedral, attended by alumni, staff, students and distinguished guests.',
-      category: 'Events' },
+    {
+        id: 1,
+        title: 'Annual Prize Giving & Speech Day 2025',
+        date: 'March 2025',
+        summary: 'SLGS held its prestigious Speech and Prize Giving Day, honouring top performers with subject prizes, house awards, and the coveted Headmaster\'s Prize. Alumni, parents, and distinguished guests packed the hall in proud attendance of the school\'s finest tradition.',
+        category: 'Events',
+        color: '#1B4D2E',
+    },
+    {
+        id: 2,
+        title: '180 Years of Excellence — Founders\' Day',
+        date: '25 March 2025',
+        summary: 'SLGS marked its 180th founding anniversary with a solemn Thanksgiving Service at historic St George\'s Cathedral, Freetown — commemorating the day CMS opened Africa\'s first secondary school on 25 March 1845 under Rev. Thomas Peyton.',
+        category: 'Anniversary',
+        image: 'https://upload.wikimedia.org/wikipedia/en/b/b4/Sierra_Leone_Grammar_School_shield.jpg',
+    },
+    {
+        id: 3,
+        title: 'WASSCE 2024: Outstanding National Results',
+        date: 'November 2024',
+        summary: 'SLGS students delivered exceptional results in the 2024 WAEC WASSCE examinations. Top achievers earned A grades across Biology, Chemistry, Physics, Mathematics and Literature — reinforcing the school\'s 180-year reputation as a national centre of excellence.',
+        category: 'Achievement',
+        color: '#8B6914',
+    },
+    {
+        id: 4,
+        title: 'Thanksgiving Service at St George\'s Cathedral',
+        date: 'January 2025',
+        summary: 'Students, staff and Old Boys gathered at the historic St George\'s Cathedral, Freetown, for the annual Thanksgiving Service — a cherished Regentonian tradition rooted in the school\'s Anglican founding. The service opened the new academic year with prayer and reflection.',
+        category: 'Faith & Tradition',
+        color: '#1565C0',
+    },
+    {
+        id: 5,
+        title: 'Inter-House Sports Day 2025',
+        date: 'February 2025',
+        summary: 'The annual Inter-House Sports Day ignited fierce but friendly competition across all four houses. Track events, relay races, and field sports drew enthusiastic crowds, with students demonstrating the same spirit of discipline and excellence that defines life at SLGS.',
+        category: 'Sports',
+        color: '#2D6A4F',
+    },
+    {
+        id: 6,
+        title: 'SLGS Marching Band: 113 Years Strong',
+        date: 'April 2025',
+        summary: 'Founded in 1912, the SLGS marching band — one of the oldest in West Africa — performed at national independence celebrations. The band remains a proud emblem of the school\'s heritage, discipline, and cultural identity across generations of Regentonians.',
+        category: 'Heritage',
+        color: '#4A1D96',
+    },
 ];
 
 // Grade helpers

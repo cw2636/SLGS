@@ -495,6 +495,19 @@ h1,h2,h3,h4,h5,h6 { font-family: 'Playfair Display', Georgia, serif; line-height
   background:var(--bg-card); border:1px solid var(--border); border-radius:var(--r-lg);
   padding:1.75rem; transition:var(--t); position: relative; overflow: hidden;
 }
+.news-img {
+  height: 150px; margin: -1.75rem -1.75rem 1.25rem;
+  overflow: hidden; border-radius: var(--r-lg) var(--r-lg) 0 0;
+}
+.news-img img { width:100%; height:100%; object-fit:contain; display:block; background:var(--bg-alt); padding:.5rem; }
+.news-img--color {
+  display: flex; align-items: center; justify-content: center;
+  opacity: 0.82;
+}
+.news-img__year {
+  font-family: var(--font-serif); font-size: 2.5rem; font-weight: 700;
+  color: rgba(255,255,255,0.35); letter-spacing: 2px; user-select: none;
+}
 .news-card::after {
   content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 2px;
   background: linear-gradient(90deg, var(--gold), transparent);

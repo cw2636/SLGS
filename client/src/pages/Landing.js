@@ -284,6 +284,15 @@ export default function Landing() {
                     <div className="news-grid">
                         {NEWS.map((n, i) => (
                             <div key={n.id} className={`news-card fu d${i + 1}`}>
+                                {n.image ? (
+                                    <div className="news-img">
+                                        <img src={n.image} alt={n.title} />
+                                    </div>
+                                ) : (
+                                    <div className="news-img news-img--color" style={{ background: `linear-gradient(135deg, ${n.color || 'var(--green)'}, ${n.color || 'var(--green)'}99)` }}>
+                                        <span className="news-img__year">{n.date.split(' ').pop()}</span>
+                                    </div>
+                                )}
                                 <span className="news-cat">{n.category}</span>
                                 <h3>{n.title}</h3>
                                 <p>{n.summary}</p>
