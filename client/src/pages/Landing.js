@@ -304,6 +304,9 @@ export default function Landing() {
                                         alt={n.title}
                                         loading="lazy"
                                         onError={e => { e.target.src = 'https://upload.wikimedia.org/wikipedia/en/b/b4/Sierra_Leone_Grammar_School_shield.jpg'; }} />
+                                    <div className="news-img-overlay">
+                                        <span className="news-read-more">Read More &rarr;</span>
+                                    </div>
                                 </div>
                                 <span className="news-cat">{n.category}</span>
                                 <h3>{n.title}</h3>

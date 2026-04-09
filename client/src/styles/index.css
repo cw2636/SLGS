@@ -490,16 +490,67 @@ h1,h2,h3,h4,h5,h6 { font-family: 'Playfair Display', Georgia, serif; line-height
 .why-card p  { color:var(--text-muted); font-size:0.87rem; line-height:1.65; }
 
 /* ── NEWS ── */
-.news-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:1.5rem; margin-top:3rem; }
+.news-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.5rem;
+  margin-top: 3rem;
+  overflow: visible;       /* let expanded cards escape bounds */
+}
 .news-card {
-  background:var(--bg-card); border:1px solid var(--border); border-radius:var(--r-lg);
-  padding:1.75rem; transition:var(--t); position: relative; overflow: hidden;
+  background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--r-lg);
+  padding: 1.75rem;
+  transition: transform .35s cubic-bezier(.25,.8,.25,1),
+              box-shadow .35s cubic-bezier(.25,.8,.25,1),
+              border-color .25s;
+  position: relative; overflow: hidden;
+  z-index: 1;
+  cursor: pointer;
 }
 .news-img {
-  height: 150px; margin: -1.75rem -1.75rem 1.25rem;
+  height: 210px; margin: -1.75rem -1.75rem 1.25rem;
   overflow: hidden; border-radius: var(--r-lg) var(--r-lg) 0 0;
+  position: relative;
 }
-.news-img img { width:100%; height:100%; object-fit:contain; display:block; background:var(--bg-alt); padding:.5rem; }
+.news-img img {
+  width: 100%; height: 100%;
+  object-fit: cover; display: block;
+  transition: transform .5s cubic-bezier(.25,.8,.25,1);
+}
+/* Overlay that slides up on hover */
+.news-img-overlay {
+  position: absolute; inset: 0;
+  background: linear-gradient(to top, rgba(0,0,0,.78) 0%, rgba(0,0,0,.25) 45%, transparent 70%);
+  display: flex; align-items: flex-end; justify-content: flex-end;
+  padding: .9rem 1.1rem;
+  opacity: 0;
+  transform: translateY(6px);
+  transition: opacity .3s ease, transform .3s ease;
+  pointer-events: none;
+}
+.news-read-more {
+  color: var(--gold); font-size: .78rem; font-weight: 800;
+  letter-spacing: 1px; text-transform: uppercase;
+  background: rgba(0,0,0,.45); border: 1px solid var(--gold-border);
+  border-radius: var(--r-f); padding: 4px 12px;
+}
+/* Gold bottom bar */
+.news-card::after {
+  content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 2px;
+  background: linear-gradient(90deg, var(--gold), transparent);
+  transform: scaleX(0); transform-origin: left; transition: transform .35s;
+}
+/* ---- HOVER ---- */
+.news-card:hover {
+  border-color: var(--gold-border);
+  transform: translateY(-10px) scale(1.035);
+  box-shadow: 0 24px 64px rgba(0,0,0,.35), 0 0 0 1.5px var(--gold-border);
+  z-index: 20;
+}
+.news-card:hover::after           { transform: scaleX(1); }
+.news-card:hover .news-img img    { transform: scale(1.1); }
+.news-card:hover .news-img-overlay { opacity: 1; transform: translateY(0); }
+
 .news-img--color {
   display: flex; align-items: center; justify-content: center;
   opacity: 0.82;
@@ -508,13 +559,6 @@ h1,h2,h3,h4,h5,h6 { font-family: 'Playfair Display', Georgia, serif; line-height
   font-family: var(--font-serif); font-size: 2.5rem; font-weight: 700;
   color: rgba(255,255,255,0.35); letter-spacing: 2px; user-select: none;
 }
-.news-card::after {
-  content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 2px;
-  background: linear-gradient(90deg, var(--gold), transparent);
-  transform: scaleX(0); transform-origin: left; transition: transform .35s;
-}
-.news-card:hover { border-color:var(--gold-border); transform:translateY(-4px); box-shadow: var(--sh-md); }
-.news-card:hover::after { transform: scaleX(1); }
 .news-cat {
   display:inline-block; font-size:0.72rem; font-weight:700; letter-spacing:1px;
   text-transform:uppercase; color:var(--gold); background:var(--gold-dim);
@@ -1072,21 +1116,6 @@ h1,h2,h3,h4,h5,h6 { font-family: 'Playfair Display', Georgia, serif; line-height
 .lb-caption h3 { font-size: 1.15rem; font-weight: 700; margin-bottom: .4rem; }
 .lb-caption p  { font-size: .9rem; color: var(--text-muted); margin-bottom: .4rem; }
 .lb-caption span { font-size: .78rem; color: var(--gold); font-weight: 600; }
-
-/* ── NEWS card image cleanup ── */
-.news-img {
-  height: 200px;
-  margin: -1.75rem -1.75rem 1.25rem;
-  overflow: hidden;
-  border-radius: var(--r-lg) var(--r-lg) 0 0;
-}
-.news-img img {
-  width: 100%; height: 100%;
-  object-fit: cover;
-  display: block;
-  transition: transform .4s;
-}
-.news-card:hover .news-img img { transform: scale(1.04); }
 
 /* ═══════════════════════════════════════════════════
    IT CONTENT MANAGER DASHBOARD
