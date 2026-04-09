@@ -202,7 +202,8 @@ export const NEWS = [
         date: 'March 2025',
         summary: 'SLGS held its prestigious Speech and Prize Giving Day, honouring top performers with subject prizes, house awards, and the coveted Headmaster\'s Prize. Alumni, parents, and distinguished guests packed the hall in proud attendance of the school\'s finest tradition.',
         category: 'Events',
-        image: 'https://picsum.photos/seed/slgs-prize25/600/360',
+        // Students in uniform at Freetown secondary school — Wikimedia Commons, Public Domain
+        image: 'https://upload.wikimedia.org/wikipedia/commons/6/62/Jill_Biden_visits_St._Joseph%27s_Secondary_School%2C_Freetown%2C_Sierra_Leone_%282014-07-07%29_04.jpg',
     },
     {
         id: 2,
@@ -210,7 +211,8 @@ export const NEWS = [
         date: '25 March 2025',
         summary: 'SLGS marked its 180th founding anniversary with a solemn Thanksgiving Service at historic St George\'s Cathedral, Freetown — commemorating the day CMS opened Africa\'s first secondary school on 25 March 1845 under Rev. Thomas Peyton.',
         category: 'Anniversary',
-        image: 'https://picsum.photos/seed/slgs-founders25/600/360',
+        // SLGS official school crest/shield — Wikipedia, fair use
+        image: 'https://upload.wikimedia.org/wikipedia/en/b/b4/Sierra_Leone_Grammar_School_shield.jpg',
     },
     {
         id: 3,
@@ -218,7 +220,8 @@ export const NEWS = [
         date: 'November 2024',
         summary: 'SLGS students delivered exceptional results in the 2024 WAEC WASSCE examinations. Top achievers earned A grades across Biology, Chemistry, Physics, Mathematics and Literature — reinforcing the school\'s 180-year reputation as a national centre of excellence.',
         category: 'Achievement',
-        image: 'https://picsum.photos/seed/slgs-wassce24/600/360',
+        // Sierra Leone school award ceremony, 2024 — Wikimedia Commons, CC0
+        image: 'https://upload.wikimedia.org/wikipedia/commons/5/5a/2024_SL_National_winner_Kelmond_Preparotory_School_with_OSLF_Director_and_team.jpg',
     },
     {
         id: 4,
@@ -226,7 +229,8 @@ export const NEWS = [
         date: 'January 2025',
         summary: 'Students, staff and Old Boys gathered at the historic St George\'s Cathedral, Freetown, for the annual Thanksgiving Service — a cherished Regentonian tradition rooted in the school\'s Anglican founding. The service opened the new academic year with prayer and reflection.',
         category: 'Faith & Tradition',
-        image: 'https://picsum.photos/seed/slgs-church25/600/360',
+        // St George\' Cathedral, Freetown — Wikimedia Commons, CC BY-SA 4.0
+        image: 'https://upload.wikimedia.org/wikipedia/commons/c/c3/St._George%27s_Cathedral_Freetown.jpg',
     },
     {
         id: 5,
@@ -234,7 +238,8 @@ export const NEWS = [
         date: 'February 2025',
         summary: 'The annual Inter-House Sports Day ignited fierce but friendly competition across all four houses. Track events, relay races, and field sports drew enthusiastic crowds, with students demonstrating the same spirit of discipline and excellence that defines life at SLGS.',
         category: 'Sports',
-        image: 'https://picsum.photos/seed/slgs-sports25/600/360',
+        // Students waving at Freetown secondary school — Wikimedia Commons, Public Domain
+        image: 'https://upload.wikimedia.org/wikipedia/commons/b/ba/Jill_Biden_visits_St._Joseph%27s_Secondary_School%2C_Freetown%2C_Sierra_Leone_%282014-07-07%29_05.jpg',
     },
     {
         id: 6,
@@ -242,21 +247,39 @@ export const NEWS = [
         date: 'April 2025',
         summary: 'Founded in 1912, the SLGS marching band — one of the oldest in West Africa — performed at national independence celebrations. The band remains a proud emblem of the school\'s heritage, discipline, and cultural identity across generations of Regentonians.',
         category: 'Heritage',
-        image: 'https://picsum.photos/seed/slgs-band25/600/360',
+        // 2024 Sierra Leone school celebration ceremony — Wikimedia Commons, CC0
+        image: 'https://upload.wikimedia.org/wikipedia/commons/f/f9/2024_Celebration_of_the_WikiChallenge_winners_at_the_Orange_HQ.jpg',
     },
 ];
 
 // ── Events Gallery ────────────────────────────────────────────
 // Defaults. IT admin can override via localStorage key 'slgs_it_gallery'
 export const GALLERY_DEFAULT = [
-    { id: 1, title: 'Prize Giving & Speech Day', date: 'March 2025',   caption: 'Top students receive their awards at the annual ceremony', image: 'https://picsum.photos/seed/slgs-gal1/800/560' },
-    { id: 2, title: "Founders' Day Thanksgiving", date: '25 Mar 2025', caption: '180th anniversary celebrations at St George\'s Cathedral', image: 'https://picsum.photos/seed/slgs-gal2/800/560' },
-    { id: 3, title: 'Inter-House Sports Day',     date: 'Feb 2025',    caption: 'Students compete across all four houses in athletics',       image: 'https://picsum.photos/seed/slgs-gal3/800/560' },
-    { id: 4, title: 'WASSCE Top Achievers 2024',  date: 'Nov 2024',    caption: 'Class of 2024 excellence — outstanding national results',     image: 'https://picsum.photos/seed/slgs-gal4/800/560' },
-    { id: 5, title: 'Annual Thanksgiving Service',date: 'Jan 2025',    caption: 'Year-opening worship at St George\'s Cathedral, Freetown',   image: 'https://picsum.photos/seed/slgs-gal5/800/560' },
-    { id: 6, title: 'Independence Day Parade',    date: 'April 2025',  caption: 'The SLGS Marching Band at national independence celebrations', image: 'https://picsum.photos/seed/slgs-gal6/800/560' },
-    { id: 7, title: 'Science Fair 2025',          date: 'March 2025',  caption: 'Student innovations showcased at the annual science exhibition', image: 'https://picsum.photos/seed/slgs-gal7/800/560' },
-    { id: 8, title: 'Chapel Morning Service',     date: 'Feb 2025',    caption: 'Daily morning worship — Anglican values at the heart of SLGS',  image: 'https://picsum.photos/seed/slgs-gal8/800/560' },
+    // All images: real Wikimedia Commons photos from Sierra Leone / Freetown (free license)
+    { id: 1, title: 'Prize Giving & Speech Day', date: 'March 2025',
+      caption: 'Top students receive their awards at the annual ceremony',
+      image: 'https://upload.wikimedia.org/wikipedia/commons/6/62/Jill_Biden_visits_St._Joseph%27s_Secondary_School%2C_Freetown%2C_Sierra_Leone_%282014-07-07%29_04.jpg' },
+    { id: 2, title: "Founders' Day Thanksgiving", date: '25 Mar 2025',
+      caption: '180th anniversary — St George\'s Cathedral, Freetown, Anglican Diocese',
+      image: 'https://upload.wikimedia.org/wikipedia/commons/c/c3/St._George%27s_Cathedral_Freetown.jpg' },
+    { id: 3, title: 'Inter-House Sports Day', date: 'Feb 2025',
+      caption: 'Students compete across all four houses in track and field athletics',
+      image: 'https://upload.wikimedia.org/wikipedia/commons/b/ba/Jill_Biden_visits_St._Joseph%27s_Secondary_School%2C_Freetown%2C_Sierra_Leone_%282014-07-07%29_05.jpg' },
+    { id: 4, title: 'WASSCE Top Achievers 2024', date: 'Nov 2024',
+      caption: 'Sierra Leone school award ceremony — celebrating academic excellence',
+      image: 'https://upload.wikimedia.org/wikipedia/commons/5/5a/2024_SL_National_winner_Kelmond_Preparotory_School_with_OSLF_Director_and_team.jpg' },
+    { id: 5, title: 'Annual Thanksgiving Service', date: 'Jan 2025',
+      caption: 'Year-opening worship at St George\'s Cathedral, seat of the Anglican Diocese of Freetown',
+      image: 'https://upload.wikimedia.org/wikipedia/commons/c/c3/St._George%27s_Cathedral_Freetown.jpg' },
+    { id: 6, title: 'Independence Day Parade', date: 'April 2025',
+      caption: 'The SLGS Marching Band at national independence celebrations, Freetown',
+      image: 'https://upload.wikimedia.org/wikipedia/commons/f/f9/2024_Celebration_of_the_WikiChallenge_winners_at_the_Orange_HQ.jpg' },
+    { id: 7, title: 'Science Fair 2025', date: 'March 2025',
+      caption: 'Student innovations showcased at the annual science exhibition',
+      image: 'https://upload.wikimedia.org/wikipedia/commons/4/48/Jill_Biden_visits_Freetown%2C_Sierra_Leone_%282014-07%29_03.jpg' },
+    { id: 8, title: 'SLGS Annual Gathering', date: 'Feb 2025',
+      caption: 'Regentonians — staff, students and alumni — at the school\'s annual gathering',
+      image: 'https://upload.wikimedia.org/wikipedia/commons/b/b5/Aberdeen%2C_Freetown%2C_Sierra_Leone_-_panoramio.jpg' },
 ];
 
 // Grade helpers

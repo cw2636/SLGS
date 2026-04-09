@@ -300,10 +300,10 @@ export default function Landing() {
                         {news.map((n, i) => (
                             <div key={n.id} className={`news-card fu d${(i % 6) + 1}`}>
                                 <div className="news-img">
-                                    <img src={n.image || `https://picsum.photos/seed/slgs${n.id}/600/360`}
+                                    <img src={n.image || `https://upload.wikimedia.org/wikipedia/en/b/b4/Sierra_Leone_Grammar_School_shield.jpg`}
                                         alt={n.title}
                                         loading="lazy"
-                                        onError={e => { e.target.src = `https://picsum.photos/seed/slgs-fb${n.id}/600/360`; }} />
+                                        onError={e => { e.target.src = 'https://upload.wikimedia.org/wikipedia/en/b/b4/Sierra_Leone_Grammar_School_shield.jpg'; }} />
                                 </div>
                                 <span className="news-cat">{n.category}</span>
                                 <h3>{n.title}</h3>
@@ -318,14 +318,9 @@ export default function Landing() {
             {/* ── EVENTS GALLERY ── */}
             <section style={{ padding: '80px 0', background: 'var(--bg)' }}>
                 <div className="section" style={{ padding: '0 var(--px)' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '2.5rem' }}>
-                        <div>
-                            <p className="s-label">Recent Events</p>
-                            <h2 className="s-title">Life at <span className="gold-text">Grammar School</span></h2>
-                        </div>
-                        <button className="btn btn-outline btn-sm" onClick={() => navigate('/it/login')}>
-                            + Add Photos
-                        </button>
+                    <div style={{ marginBottom: '2.5rem' }}>
+                        <p className="s-label">Recent Events</p>
+                        <h2 className="s-title">Life at <span className="gold-text">Grammar School</span></h2>
                     </div>
                     <div className="events-gallery">
                         {gallery.map((g, i) => (
@@ -334,7 +329,7 @@ export default function Landing() {
                                 role="button" tabIndex={0}
                                 onKeyDown={e => e.key === 'Enter' && setLightbox(g)}>
                                 <img src={g.image} alt={g.title} loading="lazy"
-                                    onError={e => { e.target.src = `https://picsum.photos/seed/slgs-ev${g.id}/800/560`; }} />
+                                    onError={e => { e.target.src = 'https://upload.wikimedia.org/wikipedia/commons/c/c3/St._George%27s_Cathedral_Freetown.jpg'; }} />
                                 <div className="ev-photo-caption">
                                     <h4>{g.title}</h4>
                                     <p>{g.caption || g.date}</p>
