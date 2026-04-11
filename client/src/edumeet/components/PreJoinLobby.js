@@ -3,7 +3,8 @@ import {
     FaMicrophone, FaMicrophoneSlash, FaVideo, FaVideoSlash,
     FaUser, FaSignInAlt, FaCircle
 } from 'react-icons/fa';
-import BACKGROUNDS, { getBackground } from '../backgrounds';
+import BACKGROUNDS from '../backgrounds';
+import VirtualBackground from '../virtualBackground';
 
 /**
  * Pre-join lobby — Zoom/Teams style screen where users set up
@@ -14,9 +15,12 @@ export default function PreJoinLobby({ roomId, user, onJoin }) {
     const [camOn, setCamOn] = useState(true);
     const [bgId, setBgId] = useState('none');
     const [previewStream, setPreviewStream] = useState(null);
+    const [displayStream, setDisplayStream] = useState(null);
     const [error, setError] = useState('');
+    const [bgLoading, setBgLoading] = useState(false);
     const videoRef = useRef(null);
     const handedOff = useRef(false);
+    const vbRef = useRef(null);
 
     // Start camera preview
     useEffect(() => {
@@ -47,10 +51,42 @@ export default function PreJoinLobby({ roomId, user, onJoin }) {
 
     // Attach preview to video element
     useEffect(() => {
-        if (videoRef.current && previewStream) {
-            videoRef.current.srcObject = previewStream;
+        if (videoRef.current && displayStream) {
+            videoRef.current.srcObject = displayStream;
         }
-    }, [previewStream]);
+    }, [displayStream]);
+
+    // Process stream through virtual background when bgId changes
+    useEffect(() => {
+        if (!previewStream) return;
+        if (!bgId || bgId === 'none') {
+            // No processing — show raw stream
+            if (vbRef.current) vbRef.current.stop();
+            setDisplayStream(previewStream);
+            return;
+        }
+        let cancelled = false;
+        (async () => {
+            setBgLoading(true);
+            if (!vbRef.current) vbRef.current = new VirtualBackground();
+            try {
+                const processed = await vbRef.current.process(previewStream, bgId);
+                if (!cancelled) setDisplayStream(processed);
+            } catch (err) {
+                console.warn('Virtual background failed:', err);
+                if (!cancelled) setDisplayStream(previewStream);
+            }
+            if (!cancelled) setBgLoading(false);
+        })();
+        return () => { cancelled = true; };
+    }, [previewStream, bgId]);
+
+    // Cleanup VB on unmount
+    useEffect(() => {
+        return () => {
+            if (vbRef.current) { vbRef.current.destroy(); vbRef.current = null; }
+        };
+    }, []);
 
     // Toggle mic preview
     const toggleMic = () => {
@@ -69,33 +105,41 @@ export default function PreJoinLobby({ roomId, user, onJoin }) {
     };
 
     const handleJoin = () => {
-        // Mark stream as handed off so cleanup doesn't kill it
+        // Stop the lobby VB — useWebRTC will create its own
+        if (vbRef.current) { vbRef.current.destroy(); vbRef.current = null; }
         handedOff.current = true;
         onJoin({ micOn, camOn, bgId, stream: previewStream });
     };
 
-    const selectedBg = getBackground(bgId);
     const roomTitle = roomId.replace(/-/g, ' ');
-
-    // Build video wrap style based on selected background
-    const wrapStyle = selectedBg.css ? { background: selectedBg.css } : {};
 
     return (
         <div className="edm-lobby">
             <div className="edm-lobby-card">
                 {/* Left — video preview */}
                 <div className="edm-lobby-preview">
-                    <div className="edm-lobby-video-wrap" style={wrapStyle}>
+                    <div className="edm-lobby-video-wrap">
                         {camOn && previewStream?.getVideoTracks().length > 0 ? (
-                            <video
-                                ref={videoRef}
-                                autoPlay
-                                muted
-                                playsInline
-                                disablePictureInPicture
-                                className="edm-lobby-video"
-                                style={selectedBg.filter ? { filter: selectedBg.filter } : {}}
-                            />
+                            <>
+                                <video
+                                    ref={videoRef}
+                                    autoPlay
+                                    muted
+                                    playsInline
+                                    disablePictureInPicture
+                                    className="edm-lobby-video"
+                                />
+                                {bgLoading && (
+                                    <div style={{
+                                        position:'absolute', inset:0, display:'flex',
+                                        alignItems:'center', justifyContent:'center',
+                                        background:'rgba(0,0,0,0.4)', borderRadius:'inherit',
+                                        color:'#fff', fontSize:'.85rem', zIndex:2
+                                    }}>
+                                        Loading background...
+                                    </div>
+                                )}
+                            </>
                         ) : (
                             <div className="edm-lobby-avatar">
                                 <FaUser />

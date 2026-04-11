@@ -1,15 +1,11 @@
 import React, { useRef, useEffect } from 'react';
 import { FaMicrophone, FaMicrophoneSlash, FaVideo, FaVideoSlash, FaUser } from 'react-icons/fa';
-import { getBackground } from '../backgrounds';
 
 /**
  * VideoGrid — displays local + remote video tiles in a responsive grid.
+ * Background is baked into the stream via VirtualBackground processor.
  */
-export default function VideoGrid({ localStream, remoteStreams, screenStream, micOn, camOn, participants, bgId }) {
-    const bg = getBackground(bgId);
-    const tileStyle = bg?.css ? { background: bg.css } : {};
-    const videoStyle = bg?.filter ? { filter: bg.filter } : {};
-
+export default function VideoGrid({ localStream, remoteStreams, screenStream, micOn, camOn, participants }) {
     return (
         <div className="edm-video-grid">
             {/* Screen share (full-width) */}
@@ -22,8 +18,8 @@ export default function VideoGrid({ localStream, remoteStreams, screenStream, mi
 
             {/* Local video */}
             {localStream && (
-                <div className="edm-video-tile edm-local-tile" style={tileStyle}>
-                    <VideoElement stream={localStream} muted autoPlay mirror extraStyle={videoStyle} />
+                <div className="edm-video-tile edm-local-tile">
+                    <VideoElement stream={localStream} muted autoPlay mirror />
                     <div className="edm-video-label">
                         You
                         <span className="edm-video-indicators">
@@ -57,7 +53,7 @@ export default function VideoGrid({ localStream, remoteStreams, screenStream, mi
 }
 
 /** Renders a <video> element attached to a MediaStream. */
-function VideoElement({ stream, muted, autoPlay, mirror, extraStyle }) {
+function VideoElement({ stream, muted, autoPlay, mirror }) {
     const ref = useRef(null);
 
     useEffect(() => {
@@ -80,11 +76,6 @@ function VideoElement({ stream, muted, autoPlay, mirror, extraStyle }) {
         };
     }, [stream]);
 
-    const style = {
-        ...(mirror ? { transform: 'scaleX(-1)' } : {}),
-        ...(extraStyle || {}),
-    };
-
     return (
         <video
             ref={ref}
@@ -92,7 +83,7 @@ function VideoElement({ stream, muted, autoPlay, mirror, extraStyle }) {
             muted={muted}
             playsInline
             disablePictureInPicture
-            style={style}
+            style={mirror ? { transform: 'scaleX(-1)' } : {}}
         />
     );
 }

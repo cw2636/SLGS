@@ -1,4 +1,5 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
+import VirtualBackground from '../virtualBackground';
 
 const ICE_SERVERS = [
     { urls: 'stun:stun.l.google.com:19302' },
@@ -25,6 +26,8 @@ export default function useWebRTC(send, events, sessionId) {
 
     const peersRef = useRef({}); // { peerId: RTCPeerConnection }
     const localStreamRef = useRef(null);
+    const rawStreamRef = useRef(null); // original camera stream before VB processing
+    const vbRef = useRef(null); // VirtualBackground instance
     const screenStreamRef = useRef(null);
     const screenPeersRef = useRef({}); // separate connections for screen share
     const processedOffers = useRef(new Set());
@@ -102,80 +105,84 @@ export default function useWebRTC(send, events, sessionId) {
 
     // Start camera + mic (with optional initial settings from lobby)
     // If opts.stream is provided (from PreJoinLobby), reuse it instead of re-acquiring media
+    // If opts.bgId is set, process through VirtualBackground (person segmentation)
     const startMedia = useCallback(async (opts = {}) => {
         const wantMic = opts.micOn !== undefined ? opts.micOn : true;
         const wantCam = opts.camOn !== undefined ? opts.camOn : true;
+        const bgId = opts.bgId || 'none';
 
-        // Reuse lobby stream if provided
+        let rawStream;
+
+        // Get raw camera/mic stream
         if (opts.stream) {
-            const stream = opts.stream;
-            const audioTrack = stream.getAudioTracks()[0];
-            if (audioTrack) audioTrack.enabled = wantMic;
-            const videoTrack = stream.getVideoTracks()[0];
-            if (videoTrack) videoTrack.enabled = wantCam;
-
-            localStreamRef.current = stream;
-            setLocalStream(stream);
-            setMicOn(audioTrack ? wantMic : false);
-            setCamOn(videoTrack ? wantCam : false);
-            send('webrtc_ready', {});
-            return stream;
-        }
-
-        try {
-            const stream = await navigator.mediaDevices.getUserMedia({
-                video: wantCam ? { width: { ideal: 640 }, height: { ideal: 480 } } : false,
-                audio: true
-            });
-            // Apply initial mute state
-            const audioTrack = stream.getAudioTracks()[0];
-            if (audioTrack) audioTrack.enabled = wantMic;
-            const videoTrack = stream.getVideoTracks()[0];
-            if (videoTrack) videoTrack.enabled = wantCam;
-
-            localStreamRef.current = stream;
-            setLocalStream(stream);
-            setMicOn(wantMic);
-            setCamOn(videoTrack ? wantCam : false);
-
-            // Tell everyone we're ready
-            send('webrtc_ready', {});
-            return stream;
-        } catch (err) {
-            console.error('Failed to get media:', err);
-            // Try audio only
+            rawStream = opts.stream;
+        } else {
             try {
-                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                const audioTrack = stream.getAudioTracks()[0];
-                if (audioTrack) audioTrack.enabled = wantMic;
-                localStreamRef.current = stream;
-                setLocalStream(stream);
-                setMicOn(wantMic);
-                setCamOn(false);
-                send('webrtc_ready', {});
-                return stream;
-            } catch (audioErr) {
-                console.error('No media available:', audioErr);
+                rawStream = await navigator.mediaDevices.getUserMedia({
+                    video: wantCam ? { width: { ideal: 640 }, height: { ideal: 480 } } : false,
+                    audio: true
+                });
+            } catch (err) {
+                console.error('Failed to get media:', err);
+                try {
+                    rawStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                } catch (audioErr) {
+                    console.error('No media available:', audioErr);
+                    return;
+                }
             }
         }
+
+        // Apply initial mute/cam state on raw tracks
+        const audioTrack = rawStream.getAudioTracks()[0];
+        if (audioTrack) audioTrack.enabled = wantMic;
+        const videoTrack = rawStream.getVideoTracks()[0];
+        if (videoTrack) videoTrack.enabled = wantCam;
+
+        rawStreamRef.current = rawStream;
+
+        // Process through virtual background if requested
+        let finalStream = rawStream;
+        if (bgId !== 'none' && videoTrack) {
+            try {
+                if (!vbRef.current) vbRef.current = new VirtualBackground();
+                finalStream = await vbRef.current.process(rawStream, bgId);
+            } catch (err) {
+                console.warn('Virtual background failed, using raw stream:', err);
+                finalStream = rawStream;
+            }
+        }
+
+        localStreamRef.current = finalStream;
+        setLocalStream(finalStream);
+        setMicOn(audioTrack ? wantMic : false);
+        setCamOn(videoTrack ? wantCam : false);
+
+        send('webrtc_ready', {});
+        return finalStream;
     }, [send]);
 
     // Stop camera + mic
     const stopMedia = useCallback(() => {
-        if (localStreamRef.current) {
-            localStreamRef.current.getTracks().forEach(t => t.stop());
-            localStreamRef.current = null;
-            setLocalStream(null);
+        // Stop virtual background processing
+        if (vbRef.current) { vbRef.current.destroy(); vbRef.current = null; }
+        // Stop the original camera/mic tracks
+        if (rawStreamRef.current) {
+            rawStreamRef.current.getTracks().forEach(t => t.stop());
+            rawStreamRef.current = null;
         }
+        localStreamRef.current = null;
+        setLocalStream(null);
         // Close all peers and clear remote streams
         Object.keys(peersRef.current).forEach(closePeer);
         setRemoteStreams({});
     }, [closePeer]);
 
-    // Toggle mic
+    // Toggle mic — operates on the raw stream's audio track
     const toggleMic = useCallback(() => {
-        if (localStreamRef.current) {
-            const audio = localStreamRef.current.getAudioTracks()[0];
+        const stream = rawStreamRef.current || localStreamRef.current;
+        if (stream) {
+            const audio = stream.getAudioTracks()[0];
             if (audio) {
                 audio.enabled = !audio.enabled;
                 setMicOn(audio.enabled);
@@ -183,10 +190,11 @@ export default function useWebRTC(send, events, sessionId) {
         }
     }, []);
 
-    // Toggle camera
+    // Toggle camera — operates on the raw stream's video track
     const toggleCam = useCallback(() => {
-        if (localStreamRef.current) {
-            const video = localStreamRef.current.getVideoTracks()[0];
+        const stream = rawStreamRef.current || localStreamRef.current;
+        if (stream) {
+            const video = stream.getVideoTracks()[0];
             if (video) {
                 video.enabled = !video.enabled;
                 setCamOn(video.enabled);

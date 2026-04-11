@@ -25,7 +25,6 @@ export default function EduMeet() {
     const navigate = useNavigate();
 
     const [joined, setJoined] = useState(false);
-    const [bgId, setBgId] = useState('none');
 
     const { events, participants, send, connected, sessionId } = useEdumeetSocket(roomId, user);
     const {
@@ -46,10 +45,9 @@ export default function EduMeet() {
 
     // When user clicks "Join Meeting" from the lobby, start media immediately
     const handleLobbyJoin = ({ micOn: wantMic, camOn: wantCam, bgId: chosenBg, stream }) => {
-        setBgId(chosenBg || 'none');
         setJoined(true);
-        // Reuse the lobby preview stream — no delay needed, WS is already connected
-        startMedia({ micOn: wantMic, camOn: wantCam, stream });
+        // Reuse the lobby preview stream — pass bgId for virtual background
+        startMedia({ micOn: wantMic, camOn: wantCam, stream, bgId: chosenBg });
     };
 
     // Clean up remote peers instantly when participant_list shrinks
@@ -196,7 +194,6 @@ export default function EduMeet() {
                             micOn={micOn}
                             camOn={camOn}
                             participants={participants}
-                            bgId={bgId}
                         />
                     ) : (
                         <div style={{ display:'flex', flexDirection:'column', width:'100%', height:'100%', position:'relative' }}>
