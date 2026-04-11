@@ -16,14 +16,17 @@ export default function useEdumeetSocket(roomId, user) {
     const [connected, setConnected] = useState(false);
     const wsRef = useRef(null);
     const reconnectTimer = useRef(null);
+    // Unique session ID so the same user in two tabs can still signal each other
+    const sessionId = useRef(`${user?.id || user?.studentId || 'guest'}-${Date.now().toString(36)}`);
 
     const connect = useCallback(() => {
         if (!roomId || !user) return;
 
         const token = user.token || '';
+        const uid = sessionId.current;
         const params = new URLSearchParams({
             room: roomId,
-            ...(token ? { token } : { user_id: user.id || user.studentId || 'guest', name: user.name, role: user.role }),
+            ...(token ? { token } : { user_id: uid, name: user.name, role: user.role }),
         });
 
         const ws = new WebSocket(`${GO_WS_URL}/ws/join?${params}`);
@@ -70,5 +73,5 @@ export default function useEdumeetSocket(roomId, user) {
         }
     }, [roomId]);
 
-    return { events, participants, send, connected };
+    return { events, participants, send, connected, sessionId: sessionId.current };
 }

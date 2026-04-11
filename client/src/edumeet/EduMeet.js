@@ -27,12 +27,12 @@ export default function EduMeet() {
     const { user } = useAuth();
     const navigate = useNavigate();
 
-    const { events, participants, send, connected } = useEdumeetSocket(roomId, user);
+    const { events, participants, send, connected, sessionId } = useEdumeetSocket(roomId, user);
     const {
         localStream, remoteStreams, screenStream,
         startMedia, stopMedia, startScreenShare, stopScreenShare,
         toggleMic, toggleCam, micOn, camOn,
-    } = useWebRTC(send, events, user);
+    } = useWebRTC(send, events, sessionId);
 
     // UI state
     const [sidePanel, setSidePanel] = useState('chat');

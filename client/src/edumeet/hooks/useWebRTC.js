@@ -11,12 +11,12 @@ const ICE_SERVERS = [
  * Uses mesh topology (each peer connects to every other peer).
  * The Go signaling server relays SDP offers/answers and ICE candidates.
  *
- * @param {Function} send - WebSocket send function from useEdumeetSocket
- * @param {Array} events  - WebSocket events from useEdumeetSocket
- * @param {object} user   - Current user { id, name, role }
+ * @param {Function} send      - WebSocket send function from useEdumeetSocket
+ * @param {Array}    events    - WebSocket events from useEdumeetSocket
+ * @param {string}   sessionId - Unique session ID from useEdumeetSocket
  * @returns {{ localStream, remoteStreams, screenStream, startMedia, stopMedia, startScreenShare, stopScreenShare, toggleMic, toggleCam, micOn, camOn }}
  */
-export default function useWebRTC(send, events, user) {
+export default function useWebRTC(send, events, sessionId) {
     const [localStream, setLocalStream] = useState(null);
     const [remoteStreams, setRemoteStreams] = useState({}); // { peerId: { stream, name } }
     const [screenStream, setScreenStream] = useState(null);
@@ -176,12 +176,12 @@ export default function useWebRTC(send, events, user) {
                 stopScreenShare();
             };
 
-            send('screen_share_start', { userId: user?.id || user?.studentId });
+            send('screen_share_start', { userId: sessionId });
             return stream;
         } catch (err) {
             console.error('Screen share failed:', err);
         }
-    }, [send, user]);
+    }, [send, sessionId]);
 
     const stopScreenShare = useCallback(() => {
         if (screenStreamRef.current) {
@@ -196,9 +196,8 @@ export default function useWebRTC(send, events, user) {
     useEffect(() => {
         if (!events.length) return;
         const last = events[events.length - 1];
-        const myId = user?.id || user?.studentId || 'guest';
 
-        if (last.from === myId) return; // ignore own events
+        if (last.from === sessionId) return; // ignore own events
 
         switch (last.type) {
             case 'webrtc_ready': {
@@ -249,7 +248,7 @@ export default function useWebRTC(send, events, user) {
             default:
                 break;
         }
-    }, [events, user, createPeer, closePeer, send]);
+    }, [events, sessionId, createPeer, closePeer, send]);
 
     // Cleanup on unmount
     useEffect(() => {

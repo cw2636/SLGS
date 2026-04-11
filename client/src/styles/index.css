@@ -1395,9 +1395,22 @@ h1,h2,h3,h4,h5,h6 { font-family: 'Playfair Display', Georgia, serif; line-height
 
 /* ═══════════════════════════════════════════════════════════════
    EduMeet — Virtual Classroom Styles
+   Force dark theme inside classroom regardless of portal theme
    ═══════════════════════════════════════════════════════════════ */
 
-.edm-classroom { display:flex; flex-direction:column; height:100vh; background:var(--bg-dark, #0a1a0e); color:var(--text, #e0e0e0); }
+.edm-classroom {
+  --text: #e0e0e0;
+  --text-muted: #aaa;
+  --text-dim: #777;
+  --border: rgba(255,255,255,.08);
+  --border-l: rgba(255,255,255,.12);
+  --gold: #c9a227;
+  --gold-light: #d4b545;
+  --gold-dim: rgba(201,162,39,.12);
+  --r-sm: 6px;
+  --input-bg: rgba(255,255,255,.06);
+  display:flex; flex-direction:column; height:100vh; background:#0a1a0e; color:#e0e0e0;
+}
 .edm-classroom.edm-fullscreen { position:fixed; inset:0; z-index:9999; }
 
 /* Toolbar */
@@ -1437,12 +1450,13 @@ h1,h2,h3,h4,h5,h6 { font-family: 'Playfair Display', Georgia, serif; line-height
 .edm-chat-msg.me { align-self:flex-end; }
 .edm-chat-name { font-size:.72rem; color:var(--gold, #c9a227); margin-bottom:2px; }
 .edm-chat-msg.me .edm-chat-name { color:rgba(34,197,94,.7); text-align:right; }
-.edm-chat-text { background:rgba(255,255,255,.05); padding:6px 10px; border-radius:8px; font-size:.88rem; line-height:1.35; }
-.edm-chat-msg.me .edm-chat-text { background:rgba(34,197,94,.12); }
+.edm-chat-text { background:rgba(255,255,255,.08); padding:6px 10px; border-radius:8px; font-size:.88rem; line-height:1.35; color:#e0e0e0; }
+.edm-chat-msg.me .edm-chat-text { background:rgba(34,197,94,.15); color:#e0e0e0; }
 
 .edm-chat-input { display:flex; gap:.5rem; padding:.75rem 1rem; border-top:1px solid var(--border, rgba(255,255,255,.08)); }
-.edm-chat-input input { flex:1; background:rgba(255,255,255,.05); border:1px solid var(--border, rgba(255,255,255,.1)); border-radius:var(--r-sm, 6px); padding:8px 12px; color:var(--text, #e0e0e0); font-size:.88rem; outline:none; }
-.edm-chat-input input:focus { border-color:var(--gold, #c9a227); }
+.edm-chat-input input { flex:1; background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.15); border-radius:6px; padding:8px 12px; color:#f0f0f0; font-size:.88rem; outline:none; caret-color:#f0f0f0; }
+.edm-chat-input input::placeholder { color:rgba(255,255,255,.35); }
+.edm-chat-input input:focus { border-color:#c9a227; background:rgba(255,255,255,.1); }
 .edm-chat-input button { background:var(--gold, #c9a227); color:#05100a; border:none; border-radius:var(--r-sm, 6px); padding:8px 14px; cursor:pointer; font-size:.9rem; }
 .edm-chat-input button:hover { opacity:.85; }
 
@@ -1494,8 +1508,8 @@ h1,h2,h3,h4,h5,h6 { font-family: 'Playfair Display', Georgia, serif; line-height
 
 /* ── Video Grid ─────────────────────────────────────────── */
 .edm-video-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(280px,1fr)); gap:.75rem; width:100%; height:100%; align-content:start; padding:.5rem; overflow-y:auto; }
-.edm-video-tile { position:relative; background:#0a1a0e; border:1px solid var(--border, rgba(255,255,255,.08)); border-radius:var(--r-sm, 8px); overflow:hidden; aspect-ratio:16/10; }
-.edm-video-tile video { width:100%; height:100%; object-fit:cover; display:block; }
+.edm-video-tile { position:relative; background:#0a1a0e; border:1px solid rgba(255,255,255,.08); border-radius:8px; overflow:hidden; aspect-ratio:16/10; user-select:none; -webkit-user-drag:none; }
+.edm-video-tile video { width:100%; height:100%; object-fit:cover; display:block; pointer-events:none; }
 .edm-video-label { position:absolute; bottom:0; left:0; right:0; padding:6px 10px; background:linear-gradient(transparent, rgba(0,0,0,.7)); color:#fff; font-size:.78rem; display:flex; align-items:center; justify-content:space-between; }
 .edm-video-indicators { display:flex; gap:6px; font-size:.7rem; }
 .edm-indicator-off { color:#ef4444; }
