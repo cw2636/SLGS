@@ -44,12 +44,10 @@ export default function EduMeet() {
     const wbAllowed = whiteboardOpen || isHost;
 
     // When user clicks "Join Meeting" from the lobby, start media immediately
-    const handleLobbyJoin = async ({ micOn: wantMic, camOn: wantCam }) => {
+    const handleLobbyJoin = ({ micOn: wantMic, camOn: wantCam, stream }) => {
         setJoined(true);
-        // Wait a tick for the WebSocket to be ready, then start media
-        setTimeout(() => {
-            startMedia({ micOn: wantMic, camOn: wantCam });
-        }, 300);
+        // Reuse the lobby preview stream — no delay needed, WS is already connected
+        startMedia({ micOn: wantMic, camOn: wantCam, stream });
     };
 
     // Clean up remote peers instantly when participant_list shrinks

@@ -38,14 +38,18 @@ export default function useEdumeetSocket(roomId, user) {
         };
 
         ws.onmessage = (e) => {
-            try {
-                const data = JSON.parse(e.data);
-                if (data.type === 'participant_list') {
-                    setParticipants(data.payload || []);
-                } else {
-                    setEvents(prev => [...prev.slice(-200), data]); // keep last 200
-                }
-            } catch { /* ignore malformed */ }
+            // Handle possible newline-delimited JSON (multiple messages in one frame)
+            const lines = e.data.split('\n').filter(Boolean);
+            for (const line of lines) {
+                try {
+                    const data = JSON.parse(line);
+                    if (data.type === 'participant_list') {
+                        setParticipants(data.payload || []);
+                    } else {
+                        setEvents(prev => [...prev.slice(-200), data]); // keep last 200
+                    }
+                } catch { /* ignore malformed */ }
+            }
         };
 
         ws.onclose = () => {

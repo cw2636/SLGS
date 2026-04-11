@@ -74,11 +74,11 @@ export default function PreJoinLobby({ roomId, user, onJoin }) {
     };
 
     const handleJoin = () => {
-        // Stop the preview stream — EduMeet will create its own via startMedia
-        if (previewStream) previewStream.getTracks().forEach(t => t.stop());
-        onJoin({ micOn, camOn, bgId });
+        // Pass the live stream to EduMeet so it can reuse it (avoids mic re-acquire race)
+        onJoin({ micOn, camOn, bgId, stream: previewStream });
     };
 
+    const selectedBg = BACKGROUNDS.find(b => b.id === bgId);
     const roomTitle = roomId.replace(/-/g, ' ');
 
     return (
@@ -86,7 +86,9 @@ export default function PreJoinLobby({ roomId, user, onJoin }) {
             <div className="edm-lobby-card">
                 {/* Left — video preview */}
                 <div className="edm-lobby-preview">
-                    <div className="edm-lobby-video-wrap">
+                    <div className="edm-lobby-video-wrap" style={selectedBg?.color && !selectedBg.color.startsWith('linear')
+                        ? { background: selectedBg.color }
+                        : selectedBg?.color?.startsWith('linear') ? { background: selectedBg.color } : {}}>
                         {camOn && previewStream?.getVideoTracks().length > 0 ? (
                             <video
                                 ref={videoRef}
@@ -95,6 +97,7 @@ export default function PreJoinLobby({ roomId, user, onJoin }) {
                                 playsInline
                                 disablePictureInPicture
                                 className="edm-lobby-video"
+                                style={bgId === 'blur' ? { filter: 'blur(8px)' } : {}}
                             />
                         ) : (
                             <div className="edm-lobby-avatar">

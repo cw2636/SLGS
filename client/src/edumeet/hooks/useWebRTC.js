@@ -101,9 +101,27 @@ export default function useWebRTC(send, events, sessionId) {
     }, []);
 
     // Start camera + mic (with optional initial settings from lobby)
+    // If opts.stream is provided (from PreJoinLobby), reuse it instead of re-acquiring media
     const startMedia = useCallback(async (opts = {}) => {
         const wantMic = opts.micOn !== undefined ? opts.micOn : true;
         const wantCam = opts.camOn !== undefined ? opts.camOn : true;
+
+        // Reuse lobby stream if provided
+        if (opts.stream) {
+            const stream = opts.stream;
+            const audioTrack = stream.getAudioTracks()[0];
+            if (audioTrack) audioTrack.enabled = wantMic;
+            const videoTrack = stream.getVideoTracks()[0];
+            if (videoTrack) videoTrack.enabled = wantCam;
+
+            localStreamRef.current = stream;
+            setLocalStream(stream);
+            setMicOn(audioTrack ? wantMic : false);
+            setCamOn(videoTrack ? wantCam : false);
+            send('webrtc_ready', {});
+            return stream;
+        }
+
         try {
             const stream = await navigator.mediaDevices.getUserMedia({
                 video: wantCam ? { width: { ideal: 640 }, height: { ideal: 480 } } : false,
