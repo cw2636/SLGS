@@ -28,6 +28,7 @@ export default function useWebRTC(send, events, sessionId) {
     const localStreamRef = useRef(null);
     const rawStreamRef = useRef(null); // original camera stream before VB processing
     const vbRef = useRef(null); // VirtualBackground instance
+    const pendingPeers = useRef(new Set()); // peers that sent webrtc_ready before our media was ready
     const screenStreamRef = useRef(null);
     const screenPeersRef = useRef({}); // separate connections for screen share
     const processedOffers = useRef(new Set());
@@ -158,9 +159,21 @@ export default function useWebRTC(send, events, sessionId) {
         setMicOn(audioTrack ? wantMic : false);
         setCamOn(videoTrack ? wantCam : false);
 
+        // Tell everyone we're ready
         send('webrtc_ready', {});
+
+        // Connect to any peers that sent webrtc_ready before our media was ready
+        if (pendingPeers.current.size > 0) {
+            pendingPeers.current.forEach(peerId => {
+                if (!peersRef.current[peerId]) {
+                    createPeer(peerId, true);
+                }
+            });
+            pendingPeers.current.clear();
+        }
+
         return finalStream;
-    }, [send]);
+    }, [send, createPeer]);
 
     // Stop camera + mic
     const stopMedia = useCallback(() => {
@@ -173,6 +186,7 @@ export default function useWebRTC(send, events, sessionId) {
         }
         localStreamRef.current = null;
         setLocalStream(null);
+        pendingPeers.current.clear();
         // Close all peers and clear remote streams
         Object.keys(peersRef.current).forEach(closePeer);
         setRemoteStreams({});
@@ -245,6 +259,9 @@ export default function useWebRTC(send, events, sessionId) {
                 // New peer is ready — initiate connection if we have media
                 if (localStreamRef.current && !peersRef.current[last.from]) {
                     createPeer(last.from, true);
+                } else if (!localStreamRef.current) {
+                    // We don't have media yet (VB still loading). Queue this peer.
+                    pendingPeers.current.add(last.from);
                 }
                 break;
             }

@@ -54,7 +54,7 @@ export default function PreJoinLobby({ roomId, user, onJoin }) {
         if (videoRef.current && displayStream) {
             videoRef.current.srcObject = displayStream;
         }
-    }, [displayStream]);
+    }, [displayStream, camOn]);
 
     // Process stream through virtual background when bgId changes
     useEffect(() => {
