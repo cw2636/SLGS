@@ -23,6 +23,7 @@ export default function PreJoinLobby({ roomId, user, onJoin }) {
     const [previewStream, setPreviewStream] = useState(null);
     const [error, setError] = useState('');
     const videoRef = useRef(null);
+    const handedOff = useRef(false);
 
     // Start camera preview
     useEffect(() => {
@@ -46,7 +47,8 @@ export default function PreJoinLobby({ roomId, user, onJoin }) {
             }
         })();
         return () => {
-            if (stream) stream.getTracks().forEach(t => t.stop());
+            // Only stop the stream if it was NOT handed off to EduMeet
+            if (stream && !handedOff.current) stream.getTracks().forEach(t => t.stop());
         };
     }, []);
 
@@ -74,7 +76,8 @@ export default function PreJoinLobby({ roomId, user, onJoin }) {
     };
 
     const handleJoin = () => {
-        // Pass the live stream to EduMeet so it can reuse it (avoids mic re-acquire race)
+        // Mark stream as handed off so cleanup doesn't kill it
+        handedOff.current = true;
         onJoin({ micOn, camOn, bgId, stream: previewStream });
     };
 
@@ -86,19 +89,27 @@ export default function PreJoinLobby({ roomId, user, onJoin }) {
             <div className="edm-lobby-card">
                 {/* Left — video preview */}
                 <div className="edm-lobby-preview">
-                    <div className="edm-lobby-video-wrap" style={selectedBg?.color && !selectedBg.color.startsWith('linear')
-                        ? { background: selectedBg.color }
-                        : selectedBg?.color?.startsWith('linear') ? { background: selectedBg.color } : {}}>
+                    <div className="edm-lobby-video-wrap">
                         {camOn && previewStream?.getVideoTracks().length > 0 ? (
-                            <video
-                                ref={videoRef}
-                                autoPlay
-                                muted
-                                playsInline
-                                disablePictureInPicture
-                                className="edm-lobby-video"
-                                style={bgId === 'blur' ? { filter: 'blur(8px)' } : {}}
-                            />
+                            <>
+                                <video
+                                    ref={videoRef}
+                                    autoPlay
+                                    muted
+                                    playsInline
+                                    disablePictureInPicture
+                                    className="edm-lobby-video"
+                                    style={bgId === 'blur' ? { filter: 'blur(8px)' } : {}}
+                                />
+                                {bgId !== 'none' && bgId !== 'blur' && selectedBg?.color && (
+                                    <div className="edm-lobby-bg-overlay" style={{
+                                        background: selectedBg.color,
+                                        position: 'absolute', inset: 0,
+                                        opacity: 0.55, mixBlendMode: 'multiply',
+                                        pointerEvents: 'none', borderRadius: 'inherit',
+                                    }} />
+                                )}
+                            </>
                         ) : (
                             <div className="edm-lobby-avatar">
                                 <FaUser />
