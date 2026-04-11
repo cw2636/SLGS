@@ -16,6 +16,7 @@ export default function useEdumeetSocket(roomId, user) {
     const [connected, setConnected] = useState(false);
     const wsRef = useRef(null);
     const reconnectTimer = useRef(null);
+    const intentionalClose = useRef(false);
     // Unique session ID so the same user in two tabs can still signal each other
     const sessionId = useRef(`${user?.id || user?.studentId || 'guest'}-${Date.now().toString(36)}`);
 
@@ -54,16 +55,20 @@ export default function useEdumeetSocket(roomId, user) {
 
         ws.onclose = () => {
             setConnected(false);
-            // Auto-reconnect after 3s
-            reconnectTimer.current = setTimeout(connect, 3000);
+            // Only auto-reconnect if this wasn't an intentional close (leaving the room)
+            if (!intentionalClose.current) {
+                reconnectTimer.current = setTimeout(connect, 3000);
+            }
         };
 
         ws.onerror = () => ws.close();
     }, [roomId, user]);
 
     useEffect(() => {
+        intentionalClose.current = false;
         connect();
         return () => {
+            intentionalClose.current = true;
             clearTimeout(reconnectTimer.current);
             wsRef.current?.close();
         };
