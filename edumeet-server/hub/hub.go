@@ -38,6 +38,7 @@ type Hub struct {
 	register   chan *Client
 	unregister chan *Client
 	broadcast  chan *events.Envelope
+	targeted   chan *events.Envelope // messages with Target field
 }
 
 // New creates a new Hub instance.
@@ -47,6 +48,7 @@ func New() *Hub {
 		register:   make(chan *Client),
 		unregister: make(chan *Client),
 		broadcast:  make(chan *events.Envelope, 256),
+		targeted:   make(chan *events.Envelope, 256),
 	}
 }
 
@@ -103,6 +105,21 @@ func (h *Hub) Run() {
 				}
 			}
 			h.mu.RUnlock()
+
+		case env := <-h.targeted:
+			h.mu.RLock()
+			for client := range h.clients {
+				if client.RoomID == env.RoomID && client.UserID == env.Target {
+					select {
+					case client.Send <- mustJSON(env):
+					default:
+						close(client.Send)
+						delete(h.clients, client)
+					}
+					break
+				}
+			}
+			h.mu.RUnlock()
 		}
 	}
 }
@@ -120,6 +137,11 @@ func (h *Hub) Unregister(c *Client) {
 // BroadcastToRoom sends an event to all clients in a room.
 func (h *Hub) BroadcastToRoom(roomID string, env *events.Envelope) {
 	h.broadcast <- env
+}
+
+// SendToUser sends an event to a specific user in a room (for WebRTC signaling).
+func (h *Hub) SendToUser(env *events.Envelope) {
+	h.targeted <- env
 }
 
 // GetRoomParticipants returns a list of participants in a room.

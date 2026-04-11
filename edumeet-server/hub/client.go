@@ -60,6 +60,13 @@ func (c *Client) ReadPump() {
 			}
 		}
 
+		// WebRTC signaling → send to target peer only (not broadcast)
+		if env.Target != "" && (env.Type == events.TypeWebRTCOffer ||
+			env.Type == events.TypeWebRTCAnswer || env.Type == events.TypeWebRTCIce) {
+			c.Hub.SendToUser(&env)
+			continue
+		}
+
 		c.Hub.BroadcastToRoom(c.RoomID, &env)
 	}
 }

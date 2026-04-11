@@ -6,13 +6,29 @@ const COLORS = ['#ffffff', '#ef4444', '#22c55e', '#3b82f6', '#f59e0b', '#c9a227'
 /**
  * Collaborative whiteboard — draws locally and broadcasts strokes via WebSocket.
  */
-export default function Whiteboard({ events, send }) {
+export default function Whiteboard({ events, send, disabled }) {
     const canvasRef = useRef(null);
+    const containerRef = useRef(null);
     const [drawing, setDrawing] = useState(false);
     const [tool, setTool] = useState('pen');
     const [color, setColor] = useState('#ffffff');
     const [lineWidth, setLineWidth] = useState(2);
     const lastPos = useRef(null);
+
+    // Resize canvas to fill container
+    useEffect(() => {
+        const resize = () => {
+            const canvas = canvasRef.current;
+            const container = containerRef.current;
+            if (!canvas || !container) return;
+            const rect = container.getBoundingClientRect();
+            canvas.width = rect.width;
+            canvas.height = rect.height;
+        };
+        resize();
+        window.addEventListener('resize', resize);
+        return () => window.removeEventListener('resize', resize);
+    }, []);
 
     // Replay remote whiteboard strokes
     useEffect(() => {
@@ -32,7 +48,12 @@ export default function Whiteboard({ events, send }) {
         const { points, color: c, width: w } = last.payload || {};
         if (!points || points.length < 2) return;
 
-        ctx.strokeStyle = c || '#ffffff';
+        if (c === '__erase__') {
+            ctx.globalCompositeOperation = 'destination-out';
+        } else {
+            ctx.globalCompositeOperation = 'source-over';
+            ctx.strokeStyle = c || '#ffffff';
+        }
         ctx.lineWidth = w || 2;
         ctx.lineCap = 'round';
         ctx.beginPath();
@@ -41,6 +62,7 @@ export default function Whiteboard({ events, send }) {
             ctx.lineTo(points[i].x, points[i].y);
         }
         ctx.stroke();
+        ctx.globalCompositeOperation = 'source-over';
     }, [events]);
 
     const getPos = (e) => {
@@ -52,30 +74,38 @@ export default function Whiteboard({ events, send }) {
     };
 
     const startDraw = (e) => {
+        if (disabled) return;
         setDrawing(true);
         lastPos.current = getPos(e);
     };
 
     const draw = useCallback((e) => {
-        if (!drawing) return;
+        if (!drawing || disabled) return;
         const canvas = canvasRef.current;
         const ctx = canvas.getContext('2d');
         const pos = getPos(e);
 
-        ctx.strokeStyle = tool === 'eraser' ? '#0a1a0e' : color;
-        ctx.lineWidth = tool === 'eraser' ? lineWidth * 4 : lineWidth;
+        if (tool === 'eraser') {
+            ctx.globalCompositeOperation = 'destination-out';
+            ctx.lineWidth = lineWidth * 5;
+        } else {
+            ctx.globalCompositeOperation = 'source-over';
+            ctx.strokeStyle = color;
+            ctx.lineWidth = lineWidth;
+        }
         ctx.lineCap = 'round';
         ctx.beginPath();
         ctx.moveTo(lastPos.current.x, lastPos.current.y);
         ctx.lineTo(pos.x, pos.y);
         ctx.stroke();
+        ctx.globalCompositeOperation = 'source-over';
 
         // Broadcast stroke
         send('whiteboard_draw', {
             tool,
             points: [lastPos.current, pos],
-            color: tool === 'eraser' ? '#0a1a0e' : color,
-            width: tool === 'eraser' ? lineWidth * 4 : lineWidth,
+            color: tool === 'eraser' ? '__erase__' : color,
+            width: tool === 'eraser' ? lineWidth * 5 : lineWidth,
         });
 
         lastPos.current = pos;
@@ -107,19 +137,20 @@ export default function Whiteboard({ events, send }) {
                 <span className="edm-wb-sep" />
                 <input type="range" min="1" max="8" value={lineWidth} onChange={e => setLineWidth(+e.target.value)} title="Thickness" />
             </div>
-            <canvas
-                ref={canvasRef}
-                width={800}
-                height={500}
-                className="edm-wb-canvas"
-                onMouseDown={startDraw}
-                onMouseMove={draw}
-                onMouseUp={endDraw}
-                onMouseLeave={endDraw}
-                onTouchStart={startDraw}
-                onTouchMove={draw}
-                onTouchEnd={endDraw}
-            />
+            <div ref={containerRef} style={{ flex:1, position:'relative', minHeight:0 }}>
+                <canvas
+                    ref={canvasRef}
+                    className="edm-wb-canvas"
+                    style={disabled ? { cursor:'not-allowed', opacity:.6 } : {}}
+                    onMouseDown={startDraw}
+                    onMouseMove={draw}
+                    onMouseUp={endDraw}
+                    onMouseLeave={endDraw}
+                    onTouchStart={startDraw}
+                    onTouchMove={draw}
+                    onTouchEnd={endDraw}
+                />
+            </div>
         </div>
     );
 }

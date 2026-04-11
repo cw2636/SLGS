@@ -7,6 +7,7 @@ import "time"
 type Envelope struct {
 	Type      string      `json:"type"`
 	From      string      `json:"from,omitempty"`
+	Target    string      `json:"target,omitempty"` // for peer-to-peer signaling
 	RoomID    string      `json:"room_id"`
 	Payload   interface{} `json:"payload"`
 	Timestamp time.Time   `json:"timestamp,omitempty"`
@@ -22,8 +23,9 @@ const (
 	TypeChatMessage = "chat_message"
 
 	// Whiteboard
-	TypeWhiteboardDraw  = "whiteboard_draw"
-	TypeWhiteboardClear = "whiteboard_clear"
+	TypeWhiteboardDraw       = "whiteboard_draw"
+	TypeWhiteboardClear      = "whiteboard_clear"
+	TypeWhiteboardPermission = "whiteboard_permission" // teacher grants/revokes
 
 	// Interactive
 	TypeHandRaise   = "hand_raise"
@@ -32,9 +34,23 @@ const (
 	TypeQuizStart   = "quiz_start"
 	TypePollVote    = "poll_vote"
 
+	// WebRTC signaling (peer-to-peer, uses Target field)
+	TypeWebRTCOffer     = "webrtc_offer"
+	TypeWebRTCAnswer    = "webrtc_answer"
+	TypeWebRTCIce       = "webrtc_ice"
+	TypeWebRTCReady     = "webrtc_ready"     // new peer ready for offers
+
+	// Screen sharing
+	TypeScreenShareStart = "screen_share_start"
+	TypeScreenShareStop  = "screen_share_stop"
+
 	// Breakout rooms
-	TypeBreakoutJoin  = "breakout_join"
-	TypeBreakoutLeave = "breakout_leave"
+	TypeBreakoutCreate = "breakout_create" // teacher creates breakout rooms
+	TypeBreakoutAssign = "breakout_assign" // teacher assigns users
+	TypeBreakoutJoin   = "breakout_join"
+	TypeBreakoutLeave  = "breakout_leave"
+	TypeBreakoutClose  = "breakout_close"  // teacher closes all breakouts
+	TypeBreakoutList   = "breakout_list"   // server sends list of breakout rooms
 
 	// System
 	TypeParticipantList = "participant_list"

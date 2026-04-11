@@ -62,9 +62,11 @@ export default function useEdumeetSocket(roomId, user) {
         };
     }, [connect]);
 
-    const send = useCallback((type, payload = {}) => {
+    const send = useCallback((type, payload = {}, target = null) => {
         if (wsRef.current?.readyState === WebSocket.OPEN) {
-            wsRef.current.send(JSON.stringify({ type, room_id: roomId, payload }));
+            const msg = { type, room_id: roomId, payload };
+            if (target) msg.target = target;
+            wsRef.current.send(JSON.stringify(msg));
         }
     }, [roomId]);
 
