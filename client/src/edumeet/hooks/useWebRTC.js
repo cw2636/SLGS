@@ -32,6 +32,7 @@ export default function useWebRTC(send, events, sessionId) {
     const screenStreamRef = useRef(null);
     const screenPeersRef = useRef({}); // separate connections for screen share
     const processedOffers = useRef(new Set());
+    const lastEventIdx = useRef(0); // track which events we've already processed
 
     // Create a peer connection for a given peer
     const createPeer = useCallback((peerId, isInitiator) => {
@@ -248,63 +249,68 @@ export default function useWebRTC(send, events, sessionId) {
     }, [send]);
 
     // Handle signaling events from WebSocket
+    // Process ALL new events since last render (not just the last one)
     useEffect(() => {
         if (!events.length) return;
-        const last = events[events.length - 1];
+        const start = lastEventIdx.current;
+        // Detect if events array was trimmed (slice(-200)) — reset index
+        const idx = start > events.length ? 0 : start;
+        const newEvents = events.slice(idx);
+        lastEventIdx.current = events.length;
 
-        if (last.from === sessionId) return; // ignore own events
+        for (const evt of newEvents) {
+            if (evt.from === sessionId) continue; // ignore own events
 
-        switch (last.type) {
-            case 'webrtc_ready': {
-                // New peer is ready — initiate connection if we have media
-                if (localStreamRef.current && !peersRef.current[last.from]) {
-                    createPeer(last.from, true);
-                } else if (!localStreamRef.current) {
-                    // We don't have media yet (VB still loading). Queue this peer.
-                    pendingPeers.current.add(last.from);
+            switch (evt.type) {
+                case 'webrtc_ready': {
+                    if (localStreamRef.current && !peersRef.current[evt.from]) {
+                        createPeer(evt.from, true);
+                    } else if (!localStreamRef.current) {
+                        pendingPeers.current.add(evt.from);
+                    }
+                    break;
                 }
-                break;
-            }
-            case 'webrtc_offer': {
-                const key = `${last.from}-${last.timestamp}`;
-                if (processedOffers.current.has(key)) break;
-                processedOffers.current.add(key);
+                case 'webrtc_offer': {
+                    const key = `${evt.from}-${evt.timestamp}`;
+                    if (processedOffers.current.has(key)) break;
+                    processedOffers.current.add(key);
 
-                const pc = createPeer(last.from, false);
-                const sdp = last.payload?.sdp;
-                if (!sdp) break;
+                    const pc = createPeer(evt.from, false);
+                    const sdp = evt.payload?.sdp;
+                    if (!sdp) break;
 
-                pc.setRemoteDescription(new RTCSessionDescription(sdp))
-                    .then(() => pc.createAnswer())
-                    .then(answer => pc.setLocalDescription(answer))
-                    .then(() => {
-                        send('webrtc_answer', { sdp: pc.localDescription }, last.from);
-                    })
-                    .catch(console.error);
-                break;
-            }
-            case 'webrtc_answer': {
-                const pc = peersRef.current[last.from];
-                if (pc && last.payload?.sdp) {
-                    pc.setRemoteDescription(new RTCSessionDescription(last.payload.sdp))
+                    pc.setRemoteDescription(new RTCSessionDescription(sdp))
+                        .then(() => pc.createAnswer())
+                        .then(answer => pc.setLocalDescription(answer))
+                        .then(() => {
+                            send('webrtc_answer', { sdp: pc.localDescription }, evt.from);
+                        })
                         .catch(console.error);
+                    break;
                 }
-                break;
-            }
-            case 'webrtc_ice': {
-                const pc = peersRef.current[last.from];
-                if (pc && last.payload?.candidate) {
-                    pc.addIceCandidate(new RTCIceCandidate(last.payload.candidate))
-                        .catch(console.error);
+                case 'webrtc_answer': {
+                    const pc = peersRef.current[evt.from];
+                    if (pc && evt.payload?.sdp) {
+                        pc.setRemoteDescription(new RTCSessionDescription(evt.payload.sdp))
+                            .catch(console.error);
+                    }
+                    break;
                 }
-                break;
+                case 'webrtc_ice': {
+                    const pc = peersRef.current[evt.from];
+                    if (pc && evt.payload?.candidate) {
+                        pc.addIceCandidate(new RTCIceCandidate(evt.payload.candidate))
+                            .catch(console.error);
+                    }
+                    break;
+                }
+                case 'room_leave': {
+                    closePeer(evt.from);
+                    break;
+                }
+                default:
+                    break;
             }
-            case 'room_leave': {
-                closePeer(last.from);
-                break;
-            }
-            default:
-                break;
         }
     }, [events, sessionId, createPeer, closePeer, send]);
 
