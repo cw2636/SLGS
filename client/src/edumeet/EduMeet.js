@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import useEdumeetSocket from './hooks/useEdumeetSocket';
 import useWebRTC from './hooks/useWebRTC';
+import PreJoinLobby from './components/PreJoinLobby';
 import ChatPanel from './components/ChatPanel';
 import Whiteboard from './components/Whiteboard';
 import ParticipantList from './components/ParticipantList';
@@ -16,33 +17,67 @@ import {
 } from 'react-icons/fa';
 
 /**
- * EduMeet Classroom v2 — full virtual classroom with:
- * - WebRTC video/audio (mesh topology)
- * - Screen sharing
- * - Collaborative whiteboard with teacher-controlled permissions
- * - Chat, breakout rooms, hand raise
+ * EduMeet Classroom v3 — Pre-join lobby → immediate media connection.
  */
 export default function EduMeet() {
     const { roomId } = useParams();
     const { user } = useAuth();
     const navigate = useNavigate();
 
+    const [joined, setJoined] = useState(false);
+
     const { events, participants, send, connected, sessionId } = useEdumeetSocket(roomId, user);
     const {
         localStream, remoteStreams, screenStream,
         startMedia, stopMedia, startScreenShare, stopScreenShare,
-        toggleMic, toggleCam, micOn, camOn,
+        toggleMic, toggleCam, micOn, camOn, closePeer,
     } = useWebRTC(send, events, sessionId);
 
     // UI state
     const [sidePanel, setSidePanel] = useState('chat');
-    const [mainView, setMainView] = useState('video'); // 'video' | 'whiteboard'
+    const [mainView, setMainView] = useState('video');
     const [handRaised, setHandRaised] = useState(false);
     const [fullscreen, setFullscreen] = useState(false);
     const [whiteboardOpen, setWhiteboardOpen] = useState(false);
 
     const isHost = user?.role === 'teacher' || user?.role === 'principal';
     const wbAllowed = whiteboardOpen || isHost;
+
+    // When user clicks "Join Meeting" from the lobby, start media immediately
+    const handleLobbyJoin = async ({ micOn: wantMic, camOn: wantCam }) => {
+        setJoined(true);
+        // Wait a tick for the WebSocket to be ready, then start media
+        setTimeout(() => {
+            startMedia({ micOn: wantMic, camOn: wantCam });
+        }, 300);
+    };
+
+    // Clean up remote peers instantly when participant_list shrinks
+    useEffect(() => {
+        const currentPeerIds = new Set(participants.map(p => p.user_id));
+        Object.keys(remoteStreams).forEach(peerId => {
+            if (!currentPeerIds.has(peerId)) {
+                closePeer(peerId);
+            }
+        });
+    }, [participants, remoteStreams, closePeer]);
+
+    // Listen for host actions directed at us
+    useEffect(() => {
+        if (!events.length) return;
+        const last = events[events.length - 1];
+        if (last.type === 'whiteboard_permission' && !isHost) {
+            setWhiteboardOpen(last.payload?.allowed ?? false);
+        }
+        // Host muted us
+        if (last.type === 'host_mute' && last.payload?.target_user === sessionId) {
+            toggleMic(); // force mute
+        }
+        // Host removed us
+        if (last.type === 'host_remove' && last.payload?.target_user === sessionId) {
+            leaveRoom();
+        }
+    }, [events]); // eslint-disable-line react-hooks/exhaustive-deps
 
     const toggleHand = () => {
         send(handRaised ? 'hand_lower' : 'hand_raise', { raised: !handRaised });
@@ -72,14 +107,6 @@ export default function EduMeet() {
         send('whiteboard_permission', { allowed: newState });
     };
 
-    // Listen for whiteboard permission broadcast from host
-    React.useEffect(() => {
-        const last = events[events.length - 1];
-        if (last?.type === 'whiteboard_permission' && !isHost) {
-            setWhiteboardOpen(last.payload?.allowed ?? false);
-        }
-    }, [events, isHost]);
-
     // Counts
     const raisedHands = new Set();
     events.forEach(e => {
@@ -89,9 +116,14 @@ export default function EduMeet() {
     const handCount = raisedHands.size;
     const chatCount = events.filter(e => e.type === 'chat_message').length;
 
+    // ── Pre-join Lobby ──
+    if (!joined) {
+        return <PreJoinLobby roomId={roomId} user={user} onJoin={handleLobbyJoin} />;
+    }
+
+    // ── Meeting Room ──
     return (
         <div className={`edm-classroom ${fullscreen ? 'edm-fullscreen' : ''}`}>
-            {/* ── Toolbar ── */}
             <div className="edm-toolbar">
                 <div className="edm-toolbar-left">
                     <FaCircle className={`edm-status ${connected ? 'online' : 'offline'}`} />
@@ -99,24 +131,13 @@ export default function EduMeet() {
                     <span className="edm-badge">{participants.length} in room</span>
                 </div>
                 <div className="edm-toolbar-right">
-                    {/* Video / Audio */}
-                    {!localStream ? (
-                        <button className="edm-tb-btn edm-tb-join" onClick={() => startMedia()} title="Join with camera & mic">
-                            <FaVideo /> Join
-                        </button>
-                    ) : (
-                        <>
-                            <button className={`edm-tb-btn ${micOn ? 'active' : 'edm-tb-off'}`} onClick={toggleMic} title={micOn ? 'Mute' : 'Unmute'}>
-                                {micOn ? <FaMicrophone /> : <FaMicrophoneSlash />}
-                            </button>
-                            <button className={`edm-tb-btn ${camOn ? 'active' : 'edm-tb-off'}`} onClick={toggleCam} title={camOn ? 'Camera off' : 'Camera on'}>
-                                {camOn ? <FaVideo /> : <FaVideoSlash />}
-                            </button>
-                            <button className="edm-tb-btn edm-tb-off" onClick={stopMedia} title="Leave video">
-                                <FaVideoSlash />
-                            </button>
-                        </>
-                    )}
+                    {/* Mic / Cam */}
+                    <button className={`edm-tb-btn ${micOn ? 'active' : 'edm-tb-off'}`} onClick={toggleMic} title={micOn ? 'Mute' : 'Unmute'}>
+                        {micOn ? <FaMicrophone /> : <FaMicrophoneSlash />}
+                    </button>
+                    <button className={`edm-tb-btn ${camOn ? 'active' : 'edm-tb-off'}`} onClick={toggleCam} title={camOn ? 'Camera off' : 'Camera on'}>
+                        {camOn ? <FaVideo /> : <FaVideoSlash />}
+                    </button>
 
                     {/* Screen share */}
                     <button className={`edm-tb-btn ${screenStream ? 'active' : ''}`} onClick={screenStream ? stopScreenShare : startScreenShare} title={screenStream ? 'Stop sharing' : 'Share screen'}>
@@ -132,8 +153,6 @@ export default function EduMeet() {
                     <button className={`edm-tb-btn ${mainView === 'whiteboard' ? 'active' : ''}`} onClick={() => setMainView('whiteboard')} title="Whiteboard">
                         <FaChalkboard />
                     </button>
-
-                    {/* Whiteboard lock (host only) */}
                     {isHost && (
                         <button className={`edm-tb-btn ${whiteboardOpen ? 'active' : ''}`} onClick={toggleWhiteboardPermission}
                             title={whiteboardOpen ? 'Lock whiteboard' : 'Unlock whiteboard for students'}>
@@ -167,7 +186,6 @@ export default function EduMeet() {
                 </div>
             </div>
 
-            {/* ── Body ── */}
             <div className="edm-body">
                 <div className="edm-main">
                     {mainView === 'video' ? (
@@ -194,7 +212,15 @@ export default function EduMeet() {
                 {sidePanel && (
                     <div className="edm-side">
                         {sidePanel === 'chat' && <ChatPanel events={events} send={send} user={user} />}
-                        {sidePanel === 'participants' && <ParticipantList participants={participants} events={events} />}
+                        {sidePanel === 'participants' && (
+                            <ParticipantList
+                                participants={participants}
+                                events={events}
+                                isHost={isHost}
+                                send={send}
+                                sessionId={sessionId}
+                            />
+                        )}
                         {sidePanel === 'breakout' && (
                             <BreakoutRooms send={send} events={events} participants={participants} isHost={isHost} currentRoomId={roomId} />
                         )}

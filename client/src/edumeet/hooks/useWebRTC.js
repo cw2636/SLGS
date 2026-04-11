@@ -80,12 +80,17 @@ export default function useWebRTC(send, events, sessionId) {
     }, [send]);
 
     const closePeer = useCallback((peerId) => {
-        if (peersRef.current[peerId]) {
-            peersRef.current[peerId].close();
+        const pc = peersRef.current[peerId];
+        if (pc) {
+            pc.ontrack = null;
+            pc.onicecandidate = null;
+            pc.oniceconnectionstatechange = null;
+            pc.close();
             delete peersRef.current[peerId];
         }
-        if (screenPeersRef.current[peerId]) {
-            screenPeersRef.current[peerId].close();
+        const spc = screenPeersRef.current[peerId];
+        if (spc) {
+            spc.close();
             delete screenPeersRef.current[peerId];
         }
         setRemoteStreams(prev => {
@@ -95,17 +100,25 @@ export default function useWebRTC(send, events, sessionId) {
         });
     }, []);
 
-    // Start camera + mic
-    const startMedia = useCallback(async () => {
+    // Start camera + mic (with optional initial settings from lobby)
+    const startMedia = useCallback(async (opts = {}) => {
+        const wantMic = opts.micOn !== undefined ? opts.micOn : true;
+        const wantCam = opts.camOn !== undefined ? opts.camOn : true;
         try {
             const stream = await navigator.mediaDevices.getUserMedia({
-                video: { width: { ideal: 640 }, height: { ideal: 480 } },
+                video: wantCam ? { width: { ideal: 640 }, height: { ideal: 480 } } : false,
                 audio: true
             });
+            // Apply initial mute state
+            const audioTrack = stream.getAudioTracks()[0];
+            if (audioTrack) audioTrack.enabled = wantMic;
+            const videoTrack = stream.getVideoTracks()[0];
+            if (videoTrack) videoTrack.enabled = wantCam;
+
             localStreamRef.current = stream;
             setLocalStream(stream);
-            setMicOn(true);
-            setCamOn(true);
+            setMicOn(wantMic);
+            setCamOn(videoTrack ? wantCam : false);
 
             // Tell everyone we're ready
             send('webrtc_ready', {});
@@ -115,9 +128,11 @@ export default function useWebRTC(send, events, sessionId) {
             // Try audio only
             try {
                 const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                const audioTrack = stream.getAudioTracks()[0];
+                if (audioTrack) audioTrack.enabled = wantMic;
                 localStreamRef.current = stream;
                 setLocalStream(stream);
-                setMicOn(true);
+                setMicOn(wantMic);
                 setCamOn(false);
                 send('webrtc_ready', {});
                 return stream;
@@ -272,5 +287,6 @@ export default function useWebRTC(send, events, sessionId) {
         toggleCam,
         micOn,
         camOn,
+        closePeer,
     };
 }
