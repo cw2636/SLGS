@@ -134,8 +134,9 @@ export default function useWebRTC(send, events, user) {
             localStreamRef.current = null;
             setLocalStream(null);
         }
-        // Close all peers
+        // Close all peers and clear remote streams
         Object.keys(peersRef.current).forEach(closePeer);
+        setRemoteStreams({});
     }, [closePeer]);
 
     // Toggle mic

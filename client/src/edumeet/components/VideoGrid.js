@@ -56,9 +56,23 @@ function VideoElement({ stream, muted, autoPlay, mirror }) {
     const ref = useRef(null);
 
     useEffect(() => {
-        if (ref.current && stream) {
-            ref.current.srcObject = stream;
+        const video = ref.current;
+        if (!video) return;
+
+        if (stream) {
+            video.srcObject = stream;
         }
+
+        return () => {
+            // Clean up: detach stream and exit PiP on unmount
+            if (video) {
+                video.srcObject = null;
+                video.load(); // reset to clear black frame
+                if (document.pictureInPictureElement === video) {
+                    document.exitPictureInPicture().catch(() => {});
+                }
+            }
+        };
     }, [stream]);
 
     return (
@@ -67,6 +81,7 @@ function VideoElement({ stream, muted, autoPlay, mirror }) {
             autoPlay={autoPlay}
             muted={muted}
             playsInline
+            disablePictureInPicture
             style={mirror ? { transform: 'scaleX(-1)' } : {}}
         />
     );
