@@ -1,13 +1,20 @@
 import React, { useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
+import { useNavigate } from 'react-router-dom';
 import PortalSidebar from '../../components/shared/PortalSidebar';
 import { FaCalendarAlt, FaPlus, FaVideo, FaCheckCircle, FaClock } from 'react-icons/fa';
 import { MEETINGS } from '../../data/mockData';
 
-const EMPTY = { title:'', date:'', time:'', duration:'60', link:'', description:'' };
+const EMPTY = { title:'', date:'', time:'', duration:'60', description:'' };
+
+/** Generate a URL-friendly room ID from the meeting title. */
+function toRoomId(title) {
+    return title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'classroom';
+}
 
 export default function TeacherMeetings() {
     const { user } = useAuth();
+    const navigate = useNavigate();
     const [meetings, setMeetings] = useState(MEETINGS);
     const [show, setShow] = useState(false);
     const [form, setForm] = useState(EMPTY);
@@ -15,7 +22,8 @@ export default function TeacherMeetings() {
 
     const addMeeting = (e) => {
         e.preventDefault();
-        setMeetings(p => [{ id: Date.now(), ...form, duration: parseInt(form.duration), status:'upcoming', teacher: user?.name, attendees:[] }, ...p]);
+        const roomId = toRoomId(form.title) + '-' + Date.now().toString(36);
+        setMeetings(p => [{ id: Date.now(), ...form, roomId, duration: parseInt(form.duration), status:'upcoming', teacher: user?.name, attendees:[] }, ...p]);
         setForm(EMPTY);
         setShow(false);
         setSaved(true);
@@ -24,6 +32,11 @@ export default function TeacherMeetings() {
 
     const upcoming  = meetings.filter(m => m.status === 'upcoming');
     const completed = meetings.filter(m => m.status !== 'upcoming');
+
+    const joinRoom = (meeting) => {
+        const roomId = meeting.roomId || toRoomId(meeting.title);
+        navigate(`/classroom/${roomId}`);
+    };
 
     return (
         <div className="portal-layout">
@@ -59,7 +72,6 @@ export default function TeacherMeetings() {
                                         {['30','45','60','90','120'].map(d => <option key={d} value={d}>{d} mins</option>)}
                                     </select>
                                 </div>
-                                <div className="fg"><label>Meet Link (Google / Zoom)</label><input type="url" value={form.link} onChange={e => setForm(p => ({ ...p, link: e.target.value }))} placeholder="https://meet.google.com/…" /></div>
                                 <div className="fg" style={{ gridColumn:'1/-1' }}><label>Description / Agenda</label>
                                     <textarea rows={3} value={form.description} onChange={e => setForm(p => ({ ...p, description: e.target.value }))}
                                         style={{ resize:'vertical', background:'rgba(255,255,255,.05)', border:'1.5px solid var(--border)', borderRadius:'var(--r-sm)', padding:'10px 14px', color:'var(--text)', fontFamily:'inherit', fontSize:'.9rem', outline:'none' }} />
@@ -88,11 +100,9 @@ export default function TeacherMeetings() {
                                         <p className="mtg-meta"><FaCalendarAlt /> {m.date} at {m.time}</p>
                                         {m.description && <p style={{ fontSize:'.84rem', color:'var(--text-muted)', marginBottom:'.9rem' }}>{m.description}</p>}
                                         {m.attendees?.length > 0 && <p style={{ fontSize:'.78rem', color:'var(--text-dim)', marginBottom:'.9rem' }}>Attendees: {m.attendees.join(', ')}</p>}
-                                        {m.link && (
-                                            <a href={m.link} target="_blank" rel="noopener noreferrer" className="btn btn-primary btn-sm">
-                                                <FaVideo /> Join Meeting
-                                            </a>
-                                        )}
+                                        <button onClick={() => joinRoom(m)} className="btn btn-primary btn-sm">
+                                            <FaVideo /> Join Classroom
+                                        </button>
                                     </div>
                                 ))}
                             </div>

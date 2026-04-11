@@ -127,11 +127,11 @@ export const GRADE_BOOK = [
 // ── Meetings ─────────────────────────────────────────────────
 export const MEETINGS = [
     { id: 1, title: 'SS3 Mathematics Revision', date: '2026-04-12', time: '09:00', duration: '60 min',
-      link: 'https://meet.google.com/xyz-abc-123', attendees: ['SS 3 Mathematics Students'], host: 'Mr. David Conteh', status: 'upcoming' },
+      roomId: 'ss3-mathematics-revision', attendees: ['SS 3 Mathematics Students'], host: 'Mr. David Conteh', status: 'upcoming' },
     { id: 2, title: 'Parent-Teacher Consultation', date: '2026-04-15', time: '14:00', duration: '30 min',
-      link: 'https://zoom.us/j/1234567890', attendees: ['SS 3 Parents'], host: 'Mr. David Conteh', status: 'upcoming' },
+      roomId: 'parent-teacher-consultation', attendees: ['SS 3 Parents'], host: 'Mr. David Conteh', status: 'upcoming' },
     { id: 3, title: 'End-of-Term Review', date: '2026-03-28', time: '11:00', duration: '45 min',
-      link: 'https://meet.google.com/end-review', attendees: ['All SS 3 Students'], host: 'Mr. David Conteh', status: 'completed' },
+      roomId: 'end-of-term-review', attendees: ['All SS 3 Students'], host: 'Mr. David Conteh', status: 'completed' },
 ];
 
 // ── Announcements ─────────────────────────────────────────────

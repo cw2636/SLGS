@@ -13,6 +13,7 @@ const STUDENT_LINKS = [
     { label: 'My Grades',    path: '/student/grades',   icon: <FaGraduationCap /> },
     { label: 'My Classes',   path: '/student/classes',  icon: <FaBook /> },
     { label: 'My Courses',   path: '/student/courses',  icon: <FaUniversity /> },
+    { label: 'Live Meetings',path: '/student/meetings', icon: <FaCalendarAlt /> },
     { label: 'Messages',     path: '/student/messages', icon: <FaEnvelope /> },
     { label: 'My Finance',   path: '/student/finance',  icon: <FaUserTie /> },
     { label: 'My Profile',   path: '/student/profile',  icon: <FaUser /> },

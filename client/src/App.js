@@ -45,6 +45,12 @@ import PrincipalTeachers      from './pages/principal/PrincipalTeachers';
 import PrincipalReports       from './pages/principal/PrincipalReports';
 import PrincipalAnnouncements from './pages/principal/PrincipalAnnouncements';
 
+// EduMeet — custom video conferencing
+import EduMeet from './edumeet/EduMeet';
+
+// Student Meetings
+import StudentMeetings from './pages/student/StudentMeetings';
+
 export default function App() {
     return (
         <ThemeProvider>
@@ -69,6 +75,7 @@ export default function App() {
                         <Route path="/student/finance"   element={<ProtectedRoute role="student"><StudentFinance /></ProtectedRoute>} />
                         <Route path="/student/courses"   element={<ProtectedRoute role="student"><StudentCourseList /></ProtectedRoute>} />
                         <Route path="/student/courses/:courseId" element={<ProtectedRoute role="student"><StudentCourse /></ProtectedRoute>} />
+                        <Route path="/student/meetings"  element={<ProtectedRoute role="student"><StudentMeetings /></ProtectedRoute>} />
 
                         {/* Teacher portal */}
                         <Route path="/teacher/dashboard" element={<ProtectedRoute role="teacher"><TeacherDashboard /></ProtectedRoute>} />
@@ -77,6 +84,9 @@ export default function App() {
                         <Route path="/teacher/grades"    element={<ProtectedRoute role="teacher"><TeacherGrades /></ProtectedRoute>} />
                         <Route path="/teacher/messages"  element={<ProtectedRoute role="teacher"><TeacherMessages /></ProtectedRoute>} />
                         <Route path="/teacher/meetings"  element={<ProtectedRoute role="teacher"><TeacherMeetings /></ProtectedRoute>} />
+
+                        {/* EduMeet classroom — accessible to all authenticated users */}
+                        <Route path="/classroom/:roomId" element={<ProtectedRoute><EduMeet /></ProtectedRoute>} />
 
                         {/* Academic staff portal */}
                         <Route path="/staff/dashboard"   element={<ProtectedRoute role="staff"><StaffDashboard /></ProtectedRoute>} />
