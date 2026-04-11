@@ -7,9 +7,9 @@ import {
 const BACKGROUNDS = [
     { id: 'none', label: 'None', style: {} },
     { id: 'blur', label: 'Blur', style: { filter: 'blur(8px)' } },
-    { id: 'classroom', label: 'Classroom', color: '#1a4731' },
-    { id: 'library', label: 'Library', color: '#2c1810' },
-    { id: 'gradient', label: 'Gradient', color: 'linear-gradient(135deg, #0a1a0e, #1a4731)' },
+    { id: 'classroom', label: 'Classroom', color: '#2d6a4f' },
+    { id: 'library', label: 'Library', color: '#7b4a2e' },
+    { id: 'gradient', label: 'Gradient', color: 'linear-gradient(135deg, #1a4731, #c9a227)' },
 ];
 
 /**
@@ -105,8 +105,9 @@ export default function PreJoinLobby({ roomId, user, onJoin }) {
                                     <div className="edm-lobby-bg-overlay" style={{
                                         background: selectedBg.color,
                                         position: 'absolute', inset: 0,
-                                        opacity: 0.55, mixBlendMode: 'multiply',
+                                        opacity: 0.45,
                                         pointerEvents: 'none', borderRadius: 'inherit',
+                                        zIndex: 1,
                                     }} />
                                 )}
                             </>
