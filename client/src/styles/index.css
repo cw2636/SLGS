@@ -1600,7 +1600,7 @@ h1,h2,h3,h4,h5,h6 { font-family: 'Playfair Display', Georgia, serif; line-height
 .edm-lobby-bg-section { display:flex; flex-direction:column; gap:.5rem; }
 .edm-lobby-bg-section label { font-size:.78rem; font-weight:600; color:#aaa; letter-spacing:.3px; }
 .edm-lobby-bg-grid { display:flex; gap:.5rem; flex-wrap:wrap; }
-.edm-lobby-bg-opt { width:72px; height:44px; border-radius:8px; border:2px solid transparent; cursor:pointer; font-size:.65rem; color:rgba(255,255,255,.8); display:flex; align-items:flex-end; justify-content:center; padding-bottom:4px; transition:all .15s; }
+.edm-lobby-bg-opt { width:80px; height:52px; border-radius:8px; border:2px solid transparent; cursor:pointer; font-size:.62rem; font-weight:600; color:rgba(255,255,255,.9); display:flex; align-items:flex-end; justify-content:center; padding-bottom:4px; transition:all .15s; text-shadow:0 1px 3px rgba(0,0,0,.7); background-size:cover; }
 .edm-lobby-bg-opt:hover { border-color:rgba(255,255,255,.2); }
 .edm-lobby-bg-opt.active { border-color:#c9a227; box-shadow:0 0 8px rgba(201,162,39,.3); }
 

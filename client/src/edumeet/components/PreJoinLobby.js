@@ -3,14 +3,7 @@ import {
     FaMicrophone, FaMicrophoneSlash, FaVideo, FaVideoSlash,
     FaUser, FaSignInAlt, FaCircle
 } from 'react-icons/fa';
-
-const BACKGROUNDS = [
-    { id: 'none', label: 'None', style: {} },
-    { id: 'blur', label: 'Blur', style: { filter: 'blur(8px)' } },
-    { id: 'classroom', label: 'Classroom', color: '#2d6a4f' },
-    { id: 'library', label: 'Library', color: '#7b4a2e' },
-    { id: 'gradient', label: 'Gradient', color: 'linear-gradient(135deg, #1a4731, #c9a227)' },
-];
+import BACKGROUNDS, { getBackground } from '../backgrounds';
 
 /**
  * Pre-join lobby — Zoom/Teams style screen where users set up
@@ -81,36 +74,28 @@ export default function PreJoinLobby({ roomId, user, onJoin }) {
         onJoin({ micOn, camOn, bgId, stream: previewStream });
     };
 
-    const selectedBg = BACKGROUNDS.find(b => b.id === bgId);
+    const selectedBg = getBackground(bgId);
     const roomTitle = roomId.replace(/-/g, ' ');
+
+    // Build video wrap style based on selected background
+    const wrapStyle = selectedBg.css ? { background: selectedBg.css } : {};
 
     return (
         <div className="edm-lobby">
             <div className="edm-lobby-card">
                 {/* Left — video preview */}
                 <div className="edm-lobby-preview">
-                    <div className="edm-lobby-video-wrap">
+                    <div className="edm-lobby-video-wrap" style={wrapStyle}>
                         {camOn && previewStream?.getVideoTracks().length > 0 ? (
-                            <>
-                                <video
-                                    ref={videoRef}
-                                    autoPlay
-                                    muted
-                                    playsInline
-                                    disablePictureInPicture
-                                    className="edm-lobby-video"
-                                    style={bgId === 'blur' ? { filter: 'blur(8px)' } : {}}
-                                />
-                                {bgId !== 'none' && bgId !== 'blur' && selectedBg?.color && (
-                                    <div className="edm-lobby-bg-overlay" style={{
-                                        background: selectedBg.color,
-                                        position: 'absolute', inset: 0,
-                                        opacity: 0.45,
-                                        pointerEvents: 'none', borderRadius: 'inherit',
-                                        zIndex: 1,
-                                    }} />
-                                )}
-                            </>
+                            <video
+                                ref={videoRef}
+                                autoPlay
+                                muted
+                                playsInline
+                                disablePictureInPicture
+                                className="edm-lobby-video"
+                                style={selectedBg.filter ? { filter: selectedBg.filter } : {}}
+                            />
                         ) : (
                             <div className="edm-lobby-avatar">
                                 <FaUser />
@@ -164,9 +149,7 @@ export default function PreJoinLobby({ roomId, user, onJoin }) {
                                     key={bg.id}
                                     className={`edm-lobby-bg-opt ${bgId === bg.id ? 'active' : ''}`}
                                     onClick={() => setBgId(bg.id)}
-                                    style={bg.color?.startsWith('linear')
-                                        ? { background: bg.color }
-                                        : { background: bg.color || '#0f2318' }}
+                                    style={{ background: bg.thumb }}
                                 >
                                     {bg.label}
                                 </button>
