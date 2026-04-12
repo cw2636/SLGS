@@ -5,14 +5,17 @@ import { FaMicrophone, FaMicrophoneSlash, FaVideo, FaVideoSlash, FaUser } from '
  * VideoGrid — displays local + remote video tiles in a responsive grid.
  * Background is baked into the stream via VirtualBackground processor.
  */
-export default function VideoGrid({ localStream, remoteStreams, screenStream, micOn, camOn, participants }) {
+export default function VideoGrid({ localStream, remoteStreams, screenStream, remoteScreenStream, micOn, camOn, participants }) {
+    const activeScreen = screenStream || remoteScreenStream;
     return (
         <div className="edm-video-grid">
-            {/* Screen share (full-width) */}
-            {screenStream && (
+            {/* Screen share (full-width) — local or remote */}
+            {activeScreen && (
                 <div className="edm-video-tile edm-screen-tile">
-                    <VideoElement stream={screenStream} muted autoPlay />
-                    <div className="edm-video-label">Screen Share</div>
+                    <VideoElement stream={activeScreen} muted={!!screenStream} autoPlay />
+                    <div className="edm-video-label">
+                        {screenStream ? 'You are sharing' : 'Screen Share'}
+                    </div>
                 </div>
             )}
 
@@ -42,7 +45,7 @@ export default function VideoGrid({ localStream, remoteStreams, screenStream, mi
                 );
             })}
 
-            {!localStream && Object.keys(remoteStreams).length === 0 && !screenStream && (
+            {!localStream && Object.keys(remoteStreams).length === 0 && !activeScreen && (
                 <div className="edm-video-empty">
                     <FaVideoSlash style={{ fontSize: '2rem', opacity: .3 }} />
                     <p>Camera is off. Click the camera button in the toolbar to start video.</p>

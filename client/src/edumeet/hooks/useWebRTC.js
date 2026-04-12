@@ -20,7 +20,9 @@ const ICE_SERVERS = [
 export default function useWebRTC(send, events, sessionId) {
     const [localStream, setLocalStream] = useState(null);
     const [remoteStreams, setRemoteStreams] = useState({}); // { peerId: { stream, name } }
-    const [screenStream, setScreenStream] = useState(null);
+    const [screenStream, setScreenStream] = useState(null);        // local screen share
+    const [remoteScreenStream, setRemoteScreenStream] = useState(null); // remote screen share
+    const [screenSharer, setScreenSharer] = useState(null);        // who is sharing
     const [micOn, setMicOn] = useState(true);
     const [camOn, setCamOn] = useState(true);
 
@@ -30,7 +32,8 @@ export default function useWebRTC(send, events, sessionId) {
     const vbRef = useRef(null); // VirtualBackground instance
     const pendingPeers = useRef(new Set()); // peers that sent webrtc_ready before our media was ready
     const screenStreamRef = useRef(null);
-    const screenPeersRef = useRef({}); // separate connections for screen share
+    const screenSendersRef = useRef({}); // { peerId: RTCRtpSender } for screen track removal
+    const peerCameraStreamIds = useRef({}); // { peerId: streamId } — first stream per peer is camera
     const processedOffers = useRef(new Set());
     const lastEventIdx = useRef(0); // track which events we've already processed
 
@@ -48,6 +51,15 @@ export default function useWebRTC(send, events, sessionId) {
             });
         }
 
+        // If we're currently screen sharing, add that track too
+        if (screenStreamRef.current) {
+            const screenTrack = screenStreamRef.current.getVideoTracks()[0];
+            if (screenTrack) {
+                const sender = pc.addTrack(screenTrack, screenStreamRef.current);
+                screenSendersRef.current[peerId] = sender;
+            }
+        }
+
         // ICE candidates → relay to peer
         pc.onicecandidate = (e) => {
             if (e.candidate) {
@@ -55,14 +67,31 @@ export default function useWebRTC(send, events, sessionId) {
             }
         };
 
-        // Receive remote tracks
+        // Receive remote tracks — distinguish camera vs screen share by stream ID
         pc.ontrack = (e) => {
             const stream = e.streams[0];
-            if (stream) {
+            if (!stream) return;
+
+            // First stream we see from this peer is their camera; any other stream is screen share
+            if (!peerCameraStreamIds.current[peerId]) {
+                peerCameraStreamIds.current[peerId] = stream.id;
+            }
+
+            if (stream.id === peerCameraStreamIds.current[peerId]) {
                 setRemoteStreams(prev => ({
                     ...prev,
                     [peerId]: { stream, name: peerId }
                 }));
+            } else {
+                // This is a screen share stream
+                setRemoteScreenStream(stream);
+                setScreenSharer(peerId);
+                stream.onremovetrack = () => {
+                    if (stream.getTracks().length === 0) {
+                        setRemoteScreenStream(prev => prev?.id === stream.id ? null : prev);
+                        setScreenSharer(prev => prev === peerId ? null : prev);
+                    }
+                };
             }
         };
 
@@ -90,18 +119,24 @@ export default function useWebRTC(send, events, sessionId) {
             pc.ontrack = null;
             pc.onicecandidate = null;
             pc.oniceconnectionstatechange = null;
+            pc.onnegotiationneeded = null;
             pc.close();
             delete peersRef.current[peerId];
         }
-        const spc = screenPeersRef.current[peerId];
-        if (spc) {
-            spc.close();
-            delete screenPeersRef.current[peerId];
-        }
+        delete screenSendersRef.current[peerId];
+        delete peerCameraStreamIds.current[peerId];
         setRemoteStreams(prev => {
             const next = { ...prev };
             delete next[peerId];
             return next;
+        });
+        // If this peer was sharing screen, clear it
+        setScreenSharer(prev => {
+            if (prev === peerId) {
+                setRemoteScreenStream(null);
+                return null;
+            }
+            return prev;
         });
     }, []);
 
@@ -217,7 +252,42 @@ export default function useWebRTC(send, events, sessionId) {
         }
     }, []);
 
-    // Screen sharing
+    // Helper: renegotiate a peer connection (create new offer/answer)
+    const renegotiate = useCallback((peerId) => {
+        const pc = peersRef.current[peerId];
+        if (!pc) return;
+        pc.createOffer()
+            .then(offer => pc.setLocalDescription(offer))
+            .then(() => {
+                send('webrtc_offer', { sdp: pc.localDescription }, peerId);
+            })
+            .catch(console.error);
+    }, [send]);
+
+    // Screen sharing — add/remove track on all existing peer connections
+    const stopScreenShareRef = useRef(null);
+
+    const stopScreenShare = useCallback(() => {
+        // Remove screen track from all peer connections and renegotiate
+        Object.entries(screenSendersRef.current).forEach(([peerId, sender]) => {
+            const pc = peersRef.current[peerId];
+            if (pc && sender) {
+                try { pc.removeTrack(sender); } catch { /* ignore */ }
+                renegotiate(peerId);
+            }
+        });
+        screenSendersRef.current = {};
+
+        if (screenStreamRef.current) {
+            screenStreamRef.current.getTracks().forEach(t => t.stop());
+            screenStreamRef.current = null;
+            setScreenStream(null);
+        }
+        send('screen_share_stop', {});
+    }, [send, renegotiate]);
+
+    stopScreenShareRef.current = stopScreenShare;
+
     const startScreenShare = useCallback(async () => {
         try {
             const stream = await navigator.mediaDevices.getDisplayMedia({
@@ -227,26 +297,26 @@ export default function useWebRTC(send, events, sessionId) {
             screenStreamRef.current = stream;
             setScreenStream(stream);
 
+            const screenTrack = stream.getVideoTracks()[0];
+
             // When user clicks browser "Stop sharing"
-            stream.getVideoTracks()[0].onended = () => {
-                stopScreenShare();
+            screenTrack.onended = () => {
+                stopScreenShareRef.current?.();
             };
+
+            // Add screen track to all existing peer connections and renegotiate
+            Object.entries(peersRef.current).forEach(([peerId, pc]) => {
+                const sender = pc.addTrack(screenTrack, stream);
+                screenSendersRef.current[peerId] = sender;
+                renegotiate(peerId);
+            });
 
             send('screen_share_start', { userId: sessionId });
             return stream;
         } catch (err) {
             console.error('Screen share failed:', err);
         }
-    }, [send, sessionId]);
-
-    const stopScreenShare = useCallback(() => {
-        if (screenStreamRef.current) {
-            screenStreamRef.current.getTracks().forEach(t => t.stop());
-            screenStreamRef.current = null;
-            setScreenStream(null);
-        }
-        send('screen_share_stop', {});
-    }, [send]);
+    }, [send, sessionId, renegotiate]);
 
     // Handle signaling events from WebSocket
     // Process ALL new events since last render (not just the last one)
@@ -308,6 +378,17 @@ export default function useWebRTC(send, events, sessionId) {
                     closePeer(evt.from);
                     break;
                 }
+                case 'screen_share_stop': {
+                    // Remote peer stopped screen share
+                    setScreenSharer(prev => {
+                        if (prev === evt.from) {
+                            setRemoteScreenStream(null);
+                            return null;
+                        }
+                        return prev;
+                    });
+                    break;
+                }
                 default:
                     break;
             }
@@ -328,6 +409,7 @@ export default function useWebRTC(send, events, sessionId) {
         localStream,
         remoteStreams,
         screenStream,
+        remoteScreenStream,
         startMedia,
         stopMedia,
         startScreenShare,

@@ -28,7 +28,7 @@ export default function EduMeet() {
 
     const { events, participants, send, connected, sessionId } = useEdumeetSocket(roomId, user);
     const {
-        localStream, remoteStreams, screenStream,
+        localStream, remoteStreams, screenStream, remoteScreenStream,
         startMedia, stopMedia, startScreenShare, stopScreenShare,
         toggleMic, toggleCam, micOn, camOn, closePeer,
     } = useWebRTC(send, events, sessionId);
@@ -191,6 +191,7 @@ export default function EduMeet() {
                             localStream={localStream}
                             remoteStreams={remoteStreams}
                             screenStream={screenStream}
+                            remoteScreenStream={remoteScreenStream}
                             micOn={micOn}
                             camOn={camOn}
                             participants={participants}
