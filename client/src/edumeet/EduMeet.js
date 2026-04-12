@@ -203,7 +203,7 @@ export default function EduMeet() {
                         />
                     ) : (
                         <div style={{ display:'flex', flexDirection:'column', width:'100%', height:'100%', position:'relative' }}>
-                            <Whiteboard events={events} send={send} disabled={!wbAllowed} />
+                            <Whiteboard events={events} send={send} disabled={!wbAllowed} sessionId={sessionId} />
                             {!wbAllowed && (
                                 <div className="edm-wb-locked">
                                     <FaLock /> Whiteboard is locked by the teacher

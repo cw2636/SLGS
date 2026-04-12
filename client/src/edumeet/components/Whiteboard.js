@@ -6,7 +6,7 @@ const COLORS = ['#ffffff', '#ef4444', '#22c55e', '#3b82f6', '#f59e0b', '#c9a227'
 /**
  * Collaborative whiteboard — draws locally and broadcasts strokes via WebSocket.
  */
-export default function Whiteboard({ events, send, disabled }) {
+export default function Whiteboard({ events, send, disabled, sessionId }) {
     const canvasRef = useRef(null);
     const containerRef = useRef(null);
     const [drawing, setDrawing] = useState(false);
@@ -44,6 +44,9 @@ export default function Whiteboard({ events, send, disabled }) {
         lastWbIdx.current = events.length;
 
         for (const evt of newEvents) {
+            // Skip own events — we already drew locally
+            if (evt.from === sessionId) continue;
+
             if (evt.type === 'whiteboard_clear') {
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
                 continue;
@@ -56,6 +59,7 @@ export default function Whiteboard({ events, send, disabled }) {
 
             if (c === '__erase__') {
                 ctx.globalCompositeOperation = 'destination-out';
+                ctx.strokeStyle = 'rgba(0,0,0,1)';
             } else {
                 ctx.globalCompositeOperation = 'source-over';
                 ctx.strokeStyle = c || '#ffffff';
@@ -70,7 +74,7 @@ export default function Whiteboard({ events, send, disabled }) {
             ctx.stroke();
             ctx.globalCompositeOperation = 'source-over';
         }
-    }, [events]);
+    }, [events, sessionId]);
 
     const getPos = (e) => {
         const canvas = canvasRef.current;
