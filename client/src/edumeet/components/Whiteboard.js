@@ -30,39 +30,46 @@ export default function Whiteboard({ events, send, disabled }) {
         return () => window.removeEventListener('resize', resize);
     }, []);
 
-    // Replay remote whiteboard strokes
+    const lastWbIdx = useRef(0);
+
+    // Replay remote whiteboard strokes — process ALL new events since last render
     useEffect(() => {
         const canvas = canvasRef.current;
-        if (!canvas) return;
+        if (!canvas || !events.length) return;
         const ctx = canvas.getContext('2d');
 
-        const wbEvents = events.filter(e => e.type === 'whiteboard_draw' || e.type === 'whiteboard_clear');
-        const last = wbEvents[wbEvents.length - 1];
-        if (!last) return;
+        const start = lastWbIdx.current;
+        const idx = start > events.length ? 0 : start;
+        const newEvents = events.slice(idx);
+        lastWbIdx.current = events.length;
 
-        if (last.type === 'whiteboard_clear') {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            return;
-        }
+        for (const evt of newEvents) {
+            if (evt.type === 'whiteboard_clear') {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                continue;
+            }
 
-        const { points, color: c, width: w } = last.payload || {};
-        if (!points || points.length < 2) return;
+            if (evt.type !== 'whiteboard_draw') continue;
 
-        if (c === '__erase__') {
-            ctx.globalCompositeOperation = 'destination-out';
-        } else {
+            const { points, color: c, width: w } = evt.payload || {};
+            if (!points || points.length < 2) continue;
+
+            if (c === '__erase__') {
+                ctx.globalCompositeOperation = 'destination-out';
+            } else {
+                ctx.globalCompositeOperation = 'source-over';
+                ctx.strokeStyle = c || '#ffffff';
+            }
+            ctx.lineWidth = w || 2;
+            ctx.lineCap = 'round';
+            ctx.beginPath();
+            ctx.moveTo(points[0].x, points[0].y);
+            for (let i = 1; i < points.length; i++) {
+                ctx.lineTo(points[i].x, points[i].y);
+            }
+            ctx.stroke();
             ctx.globalCompositeOperation = 'source-over';
-            ctx.strokeStyle = c || '#ffffff';
         }
-        ctx.lineWidth = w || 2;
-        ctx.lineCap = 'round';
-        ctx.beginPath();
-        ctx.moveTo(points[0].x, points[0].y);
-        for (let i = 1; i < points.length; i++) {
-            ctx.lineTo(points[i].x, points[i].y);
-        }
-        ctx.stroke();
-        ctx.globalCompositeOperation = 'source-over';
     }, [events]);
 
     const getPos = (e) => {

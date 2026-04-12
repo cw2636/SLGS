@@ -64,8 +64,13 @@ export default function EduMeet() {
     useEffect(() => {
         if (!events.length) return;
         const last = events[events.length - 1];
+        if (last.from === sessionId) return; // ignore own events
         if (last.type === 'whiteboard_permission' && !isHost) {
             setWhiteboardOpen(last.payload?.allowed ?? false);
+        }
+        // Sync view when another user switches (whiteboard ↔ video)
+        if (last.type === 'view_change' && last.payload?.view) {
+            setMainView(last.payload.view);
         }
         // Host muted us
         if (last.type === 'host_mute' && last.payload?.target_user === sessionId) {
@@ -145,10 +150,10 @@ export default function EduMeet() {
                     <span className="edm-tb-sep-v" />
 
                     {/* View toggles */}
-                    <button className={`edm-tb-btn ${mainView === 'video' ? 'active' : ''}`} onClick={() => setMainView('video')} title="Video view">
+                    <button className={`edm-tb-btn ${mainView === 'video' ? 'active' : ''}`} onClick={() => { setMainView('video'); send('view_change', { view: 'video' }); }} title="Video view">
                         <FaVideo />
                     </button>
-                    <button className={`edm-tb-btn ${mainView === 'whiteboard' ? 'active' : ''}`} onClick={() => setMainView('whiteboard')} title="Whiteboard">
+                    <button className={`edm-tb-btn ${mainView === 'whiteboard' ? 'active' : ''}`} onClick={() => { setMainView('whiteboard'); send('view_change', { view: 'whiteboard' }); }} title="Whiteboard">
                         <FaChalkboard />
                     </button>
                     {isHost && (
