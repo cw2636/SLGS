@@ -1,3 +1,5 @@
+require('dotenv').config();
+
    var express     = require("express"),
     app         = express(),
     bodyParser  = require("body-parser"),
@@ -45,7 +47,7 @@ app.use(flash());
 
 // PASSPORT CONFIGURATION
 app.use(require("express-session")({
-    secret: "Once again Rusty wins cutest dog!",
+    secret: process.env.SESSION_SECRET || "Once again Rusty wins cutest dog!",
     resave: false,
     saveUninitialized: false
 }));
@@ -273,7 +275,7 @@ app.get('/users/:id', function(req,res){
 	res.redirect('/'+ req.user._id + '/studentportal');
 });
 
-app.get('/:id/classRegistration', function(req,res){
+app.get('/:id/classRegistration', isLoggedIn, isOwner, function(req,res){
 	        StudentInfo.findById(req.params.id, function(err, found){
 				if(err){
 					console.log(err);
@@ -285,7 +287,7 @@ app.get('/:id/classRegistration', function(req,res){
 			
   });
 
-app.get('/:id/userAuth', function(req,res){
+app.get('/:id/userAuth', isLoggedIn, isOwner, function(req,res){
 	  StudentInfo.findById(req.params.id, function(err, found){
 		  if(err) {
 	  console.log(err);
@@ -325,7 +327,7 @@ app.get("/logout", function(req, res){
    res.redirect("/");
 });
 
- app.get('/:id/password', function(req,res){
+ app.get('/:id/password', isLoggedIn, isOwner, function(req,res){
 	 StudentInfo.findById(req.params.id, function(err, found){
 		 if(err) {
 			 console.log(err);
@@ -337,7 +339,7 @@ app.get("/logout", function(req, res){
 	 
   });
 
-app.post('/:id/password', function(req,res){
+app.post('/:id/password', isLoggedIn, isOwner, function(req,res){
 	 StudentInfo.findById(req.params.id, function(err, found){
 		found.changePassword(req.body.old_password, req.body.new_password, function(err){
 		if(err) {
@@ -421,7 +423,7 @@ app.get('/:id', function(req,res){
 
 
 
-app.get('/:id/edit', function(req,res){
+app.get('/:id/edit', isLoggedIn, isOwner, function(req,res){
 	StudentInfo.findById(req.params.id, function(err, found){
 		if(err) {
 			res.redirect('back');
@@ -432,25 +434,49 @@ app.get('/:id/edit', function(req,res){
 	});
 });
 
-app.put('/:id', function(req,res){
-	StudentInfo.findByIdAndUpdate(req.params.id, {$set: req.body.studentInfo}, function(err, updated){
-		console.log(req.params.id);
-		console.log(req.body.studentInfo);
+app.put('/:id', isLoggedIn, isOwner, function(req,res){
+	// Whitelist allowed fields to prevent NoSQL operator injection
+	const allowed = ['first_name', 'middle_name', 'last_name', 'street', 'town', 'city', 'region', 'country', 'day', 'month', 'year'];
+	const body = req.body.studentInfo || {};
+	const update = {};
+	allowed.forEach(function(k) {
+		if (body[k] !== undefined) update[k] = String(body[k]).slice(0, 255);
+	});
+	StudentInfo.findByIdAndUpdate(req.params.id, {$set: update}, function(err, updated){
 		if(err) {
 			console.log(err);
+			return res.redirect('back');
 		}
-		else {
-			res.redirect('/' + req.params.id);
-		}
+		res.redirect('/' + req.params.id);
 	});
-		 
 });
 
 app.get('/s', function(req, res){
 	res.render('/'+ req.user._id + '/studentportal');
 });
 
-//middleware
+// ── Middleware helpers ───────────────────────────────────────────
+
+function isLoggedIn(req, res, next) {
+	if (req.isAuthenticated()) return next();
+	res.redirect('/login');
+}
+
+// Prevent IDOR: ensure the logged-in user owns the resource they're modifying.
+// Works for both local (username) and Facebook (email) users.
+function isOwner(req, res, next) {
+	StudentInfo.findById(req.params.id, function(err, found) {
+		if (err || !found) return res.redirect('back');
+		var ownerUsername = req.user.localOrFacebook == 1 ? req.user.username : req.user.email;
+		if (found.username === ownerUsername || String(found.id) === String(req.user._id)) {
+			return next();
+		}
+		return res.status(403).send('Forbidden');
+	});
+}
+
+// ── Server ───────────────────────────────────────────────────────
+
 app.listen(3000, function() {
   console.log('Server listening on port 3000'); 
 });
