@@ -1,3 +1,16 @@
 node_modules/
 client/node_modules/
 client/build/
+.env
+*.env
+
+# MongoDB data files
+data/
+
+# LiveKit binary (platform-specific, download in deployment)
+livekit-server
+livekit-server.*
+*.bak
+
+# Go build artifacts
+edumeet-server/edumeet-server

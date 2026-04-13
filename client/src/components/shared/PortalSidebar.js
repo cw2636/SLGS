@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import ThemeToggle from './ThemeToggle';
 import {
     FaTachometerAlt, FaGraduationCap, FaBook, FaUser, FaEnvelope,
     FaChalkboard, FaPen, FaCalendarAlt, FaSignOutAlt, FaBars,
@@ -11,22 +12,27 @@ const STUDENT_LINKS = [
     { label: 'Dashboard',    path: '/student/dashboard', icon: <FaTachometerAlt /> },
     { label: 'My Grades',    path: '/student/grades',   icon: <FaGraduationCap /> },
     { label: 'My Classes',   path: '/student/classes',  icon: <FaBook /> },
+    { label: 'My Courses',   path: '/student/courses',  icon: <FaUniversity /> },
+    { label: 'Live Meetings',path: '/student/meetings', icon: <FaCalendarAlt /> },
     { label: 'Messages',     path: '/student/messages', icon: <FaEnvelope /> },
+    { label: 'My Finance',   path: '/student/finance',  icon: <FaUserTie /> },
     { label: 'My Profile',   path: '/student/profile',  icon: <FaUser /> },
 ];
 
 const TEACHER_LINKS = [
     { label: 'Dashboard',    path: '/teacher/dashboard', icon: <FaTachometerAlt /> },
+    { label: 'My Courses',   path: '/teacher/courses',  icon: <FaUniversity /> },
     { label: 'Enter Grades', path: '/teacher/grades',   icon: <FaPen /> },
     { label: 'Messages',     path: '/teacher/messages', icon: <FaEnvelope /> },
     { label: 'Live Meetings',path: '/teacher/meetings', icon: <FaCalendarAlt /> },
 ];
 
 const STAFF_LINKS = [
-    { label: 'Dashboard',      path: '/staff/dashboard',             icon: <FaTachometerAlt /> },
+    { label: 'Dashboard',      path: '/staff/dashboard',                icon: <FaTachometerAlt /> },
     { label: 'Admissions',     path: '/staff/dashboard?tab=admissions', icon: <FaIdCard /> },
     { label: 'Student Roster', path: '/staff/dashboard?tab=roster',     icon: <FaUsers /> },
     { label: 'Class Enrolment',path: '/staff/dashboard?tab=enrolment',  icon: <FaClipboardList /> },
+    { label: 'Student Finance',path: '/staff/dashboard?tab=finance',    icon: <FaUserTie /> },
 ];
 
 const PRINCIPAL_LINKS = [
@@ -83,7 +89,13 @@ export default function PortalSidebar({ title, notifications = 0 }) {
                     {links.map(l => (
                         <div
                             key={l.path + l.label}
-                            className={`sb-link ${location.pathname === l.path.split('?')[0] && (!l.path.includes('?') || new URLSearchParams(l.path.split('?')[1] || '').get('tab') === new URLSearchParams(location.search).get('tab') || (l.label === 'Dashboard' && !new URLSearchParams(location.search).get('tab'))) ? 'act' : ''}`}
+                            className={(() => {
+                                const linkPath = l.path.split('?')[0];
+                                const exactMatch = location.pathname === linkPath;
+                                const prefixMatch = l.path.endsWith('/') === false && location.pathname.startsWith(linkPath + '/');
+                                const tabMatch = !l.path.includes('?') || new URLSearchParams(l.path.split('?')[1] || '').get('tab') === new URLSearchParams(location.search).get('tab') || (l.label === 'Dashboard' && !new URLSearchParams(location.search).get('tab'));
+                                return `sb-link ${(exactMatch || prefixMatch) && tabMatch ? 'act' : ''}`;
+                            })()}
                             onClick={() => { navigate(l.path); setMobile(false); }}
                         >
                             {l.icon} {l.label}
@@ -96,6 +108,9 @@ export default function PortalSidebar({ title, notifications = 0 }) {
                 </nav>
 
                 {/* User footer */}
+                <div style={{ padding:'.75rem 1rem', borderTop:'1px solid var(--border)' }}>
+                    <ThemeToggle compact />
+                </div>
                 <div className="sidebar-user">
                     <div className="su-avatar">{initials}</div>
                     <div className="su-info">

@@ -3,6 +3,19 @@ import { USERS, ADMITTED_STUDENTS } from '../data/mockData';
 
 const AuthContext = createContext(null);
 
+// Demo credential store — kept here (not in mockData) so passwords are not
+// exported as part of the user objects accessible throughout the app.
+// In a real deployment this check would happen server-side.
+const MOCK_PASSWORDS = {
+    1:  'student123',   // james.koroma
+    2:  'student123',   // aminata.sesay
+    10: 'teacher123',   // mr.conteh
+    11: 'teacher123',   // mrs.kamara
+    30: 'staff123',     // ms.johnson
+    31: 'staff123',     // mr.bangura
+    20: 'principal123', // principal
+};
+
 export function AuthProvider({ children }) {
     const [user, setUser] = useState(null);
 
@@ -17,14 +30,13 @@ export function AuthProvider({ children }) {
     const login = (username, password, role) => {
         const found = USERS.find(
             u => u.username === username.trim() &&
-                 u.password === password &&
+                 MOCK_PASSWORDS[u.id] === password &&
                  u.role === role
         );
         if (found) {
-            const { password: _pw, ...safe } = found;
-            setUser(safe);
-            localStorage.setItem('slgs_user', JSON.stringify(safe));
-            return { ok: true, user: safe };
+            setUser(found);
+            localStorage.setItem('slgs_user', JSON.stringify(found));
+            return { ok: true, user: found };
         }
         return { ok: false, error: 'Invalid credentials. Please try again.' };
     };

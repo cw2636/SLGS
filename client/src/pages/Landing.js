@@ -8,7 +8,7 @@ import {
     FaUserGraduate, FaUniversity, FaHandshake, FaStar, FaCheckCircle
 } from 'react-icons/fa';
 import { MdScience, MdHistory, MdSportsBasketball } from 'react-icons/md';
-import { NEWS, ANNOUNCEMENTS } from '../data/mockData';
+import { NEWS as NEWS_DEFAULT, GALLERY_DEFAULT } from '../data/mockData';
 
 /* ── Intersection observer hook ── */
 function useFadeIn() {
@@ -115,6 +115,21 @@ export default function Landing() {
     const [statsVis, setStatsVis] = useState(false);
     const [contactSent, setContactSent] = useState(false);
     const [showTop, setShowTop] = useState(false);
+    const [lightbox, setLightbox] = useState(null); // { image, title, caption }
+
+    // Live content — reads from localStorage if IT admin has made changes
+    const [news, setNews]       = useState(NEWS_DEFAULT);
+    const [gallery, setGallery] = useState(GALLERY_DEFAULT);
+
+    useEffect(() => {
+        try {
+            const n = localStorage.getItem('slgs_it_news');
+            const g = localStorage.getItem('slgs_it_gallery');
+            if (n) setNews(JSON.parse(n));
+            if (g) setGallery(JSON.parse(g));
+        } catch {}
+    }, []);
+
     const heroRef = useFadeIn();
     const aboutRef = useFadeIn();
     const progsRef = useFadeIn();
@@ -282,8 +297,17 @@ export default function Landing() {
                         </button>
                     </div>
                     <div className="news-grid">
-                        {NEWS.map((n, i) => (
-                            <div key={n.id} className={`news-card fu d${i + 1}`}>
+                        {news.map((n, i) => (
+                            <div key={n.id} className={`news-card fu d${(i % 6) + 1}`}>
+                                <div className="news-img">
+                                    <img src={n.image || `https://upload.wikimedia.org/wikipedia/en/b/b4/Sierra_Leone_Grammar_School_shield.jpg`}
+                                        alt={n.title}
+                                        loading="lazy"
+                                        onError={e => { e.target.src = 'https://upload.wikimedia.org/wikipedia/en/b/b4/Sierra_Leone_Grammar_School_shield.jpg'; }} />
+                                    <div className="news-img-overlay">
+                                        <span className="news-read-more">Read More &rarr;</span>
+                                    </div>
+                                </div>
                                 <span className="news-cat">{n.category}</span>
                                 <h3>{n.title}</h3>
                                 <p>{n.summary}</p>
@@ -293,6 +317,46 @@ export default function Landing() {
                     </div>
                 </div>
             </div>
+
+            {/* ── EVENTS GALLERY ── */}
+            <section style={{ padding: '80px 0', background: 'var(--bg)' }}>
+                <div className="section" style={{ padding: '0 var(--px)' }}>
+                    <div style={{ marginBottom: '2.5rem' }}>
+                        <p className="s-label">Recent Events</p>
+                        <h2 className="s-title">Life at <span className="gold-text">Grammar School</span></h2>
+                    </div>
+                    <div className="events-gallery">
+                        {gallery.map((g, i) => (
+                            <div key={g.id} className={`ev-photo fu d${(i % 4) + 1}`}
+                                onClick={() => setLightbox(g)}
+                                role="button" tabIndex={0}
+                                onKeyDown={e => e.key === 'Enter' && setLightbox(g)}>
+                                <img src={g.image} alt={g.title} loading="lazy"
+                                    onError={e => { e.target.src = 'https://upload.wikimedia.org/wikipedia/commons/c/c3/St._George%27s_Cathedral_Freetown.jpg'; }} />
+                                <div className="ev-photo-caption">
+                                    <h4>{g.title}</h4>
+                                    <p>{g.caption || g.date}</p>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            </section>
+
+            {/* ── LIGHTBOX ── */}
+            {lightbox && (
+                <div className="lb-overlay" onClick={() => setLightbox(null)}>
+                    <button className="lb-close" onClick={() => setLightbox(null)} aria-label="Close">✕</button>
+                    <div className="lb-inner" onClick={e => e.stopPropagation()}>
+                        <img src={lightbox.image} alt={lightbox.title} />
+                        <div className="lb-caption">
+                            <h3>{lightbox.title}</h3>
+                            <p>{lightbox.caption || lightbox.date}</p>
+                            <span>{lightbox.date}</span>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             {/* ── ALUMNI ── */}
             <section style={{ padding:'80px 0', overflow:'hidden', background:'var(--bg)' }}>
@@ -344,6 +408,8 @@ export default function Landing() {
                                     <button className="btn btn-outline btn-block btn-sm" onClick={() => navigate('/teacher/login')}>Teacher Login</button>
                                     <button className="btn btn-outline btn-block btn-sm" onClick={() => navigate('/staff/login')}>Staff Portal</button>
                                     <button className="btn btn-outline btn-block btn-sm" onClick={() => navigate('/principal/login')}>Principal Login</button>
+                                    <button className="btn btn-outline btn-block btn-sm" onClick={() => navigate('/it/login')}
+                                        style={{ borderStyle:'dashed', opacity:.75, fontSize:'.78rem' }}>⚙ IT Content Manager</button>
                                 </div>
                             </div>
                         </div>
