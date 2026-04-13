@@ -35,7 +35,7 @@ export default function useWebRTC(send, events, sessionId) {
     const screenSendersRef = useRef({}); // { peerId: RTCRtpSender } for screen track removal
     const peerCameraStreamIds = useRef({}); // { peerId: streamId } — first stream per peer is camera
     const processedOffers = useRef(new Set());
-    const lastEventIdx = useRef(0); // track which events we've already processed
+    const lastEventSeq = useRef(-1); // track by __seq so we survive the 200-event array cap
 
     // Create a peer connection for a given peer
     const createPeer = useCallback((peerId, isInitiator) => {
@@ -67,23 +67,54 @@ export default function useWebRTC(send, events, sessionId) {
             }
         };
 
-        // Receive remote tracks — distinguish camera vs screen share by stream ID
+        // Receive remote tracks — distinguish camera vs screen share by stream ID.
+        // During renegotiation some browsers fire ontrack with e.streams = [] even when
+        // the track was added with addTrack(track, stream). We handle both cases.
         pc.ontrack = (e) => {
-            const stream = e.streams[0];
-            if (!stream) return;
+            const stream = e.streams?.[0] ?? null;
+            const track  = e.track;
+            console.log('[WebRTC] ontrack from', peerId, 'kind:', track.kind, 'stream:', stream?.id ?? 'null', 'cameraStreamId:', peerCameraStreamIds.current[peerId] ?? 'none');
 
+            if (!stream) {
+                // Null-stream path: build a synthetic stream from the raw track
+                if (track.kind === 'video') {
+                    if (!peerCameraStreamIds.current[peerId]) {
+                        // First video from this peer → camera
+                        const s = new MediaStream([track]);
+                        peerCameraStreamIds.current[peerId] = s.id;
+                        console.log('[WebRTC] → camera stream (null-stream path) from', peerId);
+                        setRemoteStreams(prev => ({ ...prev, [peerId]: { stream: s, name: peerId } }));
+                    } else {
+                        // Camera already registered → this video track is screen share
+                        const s = new MediaStream([track]);
+                        console.log('[WebRTC] → SCREEN SHARE stream (null-stream path) from', peerId);
+                        setRemoteScreenStream(s);
+                        setScreenSharer(peerId);
+                        track.onended = () => {
+                            setRemoteScreenStream(null);
+                            setScreenSharer(prev => prev === peerId ? null : prev);
+                        };
+                    }
+                }
+                // Audio with no stream: already handled by the camera stream; skip
+                return;
+            }
+
+            // Normal path: stream is present
             // First stream we see from this peer is their camera; any other stream is screen share
             if (!peerCameraStreamIds.current[peerId]) {
                 peerCameraStreamIds.current[peerId] = stream.id;
             }
 
             if (stream.id === peerCameraStreamIds.current[peerId]) {
+                console.log('[WebRTC] → camera stream (normal path) from', peerId);
                 setRemoteStreams(prev => ({
                     ...prev,
                     [peerId]: { stream, name: peerId }
                 }));
             } else {
-                // This is a screen share stream
+                // Different stream ID → screen share
+                console.log('[WebRTC] → SCREEN SHARE stream (normal path) from', peerId);
                 setRemoteScreenStream(stream);
                 setScreenSharer(peerId);
                 stream.onremovetrack = () => {
@@ -96,22 +127,41 @@ export default function useWebRTC(send, events, sessionId) {
         };
 
         pc.oniceconnectionstatechange = () => {
-            if (pc.iceConnectionState === 'disconnected' || pc.iceConnectionState === 'failed') {
+            const state = pc.iceConnectionState;
+            console.log('[WebRTC] ICE state', peerId, '→', state);
+            if (state === 'failed') {
                 closePeer(peerId);
+            } else if (state === 'disconnected') {
+                setTimeout(() => {
+                    if (pc.iceConnectionState === 'disconnected' || pc.iceConnectionState === 'failed') {
+                        closePeer(peerId);
+                    }
+                }, 5000);
             }
         };
 
-        if (isInitiator) {
-            pc.createOffer()
-                .then(offer => pc.setLocalDescription(offer))
-                .then(() => {
-                    send('webrtc_offer', { sdp: pc.localDescription }, peerId);
-                })
-                .catch(console.error);
-        }
+        // Use onnegotiationneeded so the browser fires renegotiation at the right time.
+        // This covers both the initial offer and any mid-call renegotiation (screen share,
+        // track removal). Non-initiator peers never create offers — they only send answers.
+        let makingOffer = false;
+        pc.onnegotiationneeded = async () => {
+            if (!isInitiator || makingOffer) return;
+            if (pc.signalingState !== 'stable') return;
+            try {
+                makingOffer = true;
+                const offer = await pc.createOffer();
+                if (pc.signalingState !== 'stable') return; // state changed during async gap
+                await pc.setLocalDescription(offer);
+                send('webrtc_offer', { sdp: pc.localDescription }, peerId);
+            } catch (err) {
+                console.error('[WebRTC] onnegotiationneeded error:', peerId, err);
+            } finally {
+                makingOffer = false;
+            }
+        };
 
         return pc;
-    }, [send]);
+    }, [send]); // eslint-disable-line react-hooks/exhaustive-deps — closePeer is stable ([] deps)
 
     const closePeer = useCallback((peerId) => {
         const pc = peersRef.current[peerId];
@@ -252,28 +302,17 @@ export default function useWebRTC(send, events, sessionId) {
         }
     }, []);
 
-    // Helper: renegotiate a peer connection (create new offer/answer)
-    const renegotiate = useCallback((peerId) => {
-        const pc = peersRef.current[peerId];
-        if (!pc) return;
-        pc.createOffer()
-            .then(offer => pc.setLocalDescription(offer))
-            .then(() => {
-                send('webrtc_offer', { sdp: pc.localDescription }, peerId);
-            })
-            .catch(console.error);
-    }, [send]);
-
     // Screen sharing — add/remove track on all existing peer connections
+    // Renegotiation is driven by onnegotiationneeded (set in createPeer) so we don't
+    // need to call createOffer manually — addTrack/removeTrack trigger the event.
     const stopScreenShareRef = useRef(null);
 
     const stopScreenShare = useCallback(() => {
-        // Remove screen track from all peer connections and renegotiate
+        // Remove screen track from all peer connections — onnegotiationneeded fires automatically
         Object.entries(screenSendersRef.current).forEach(([peerId, sender]) => {
             const pc = peersRef.current[peerId];
             if (pc && sender) {
                 try { pc.removeTrack(sender); } catch { /* ignore */ }
-                renegotiate(peerId);
             }
         });
         screenSendersRef.current = {};
@@ -284,7 +323,7 @@ export default function useWebRTC(send, events, sessionId) {
             setScreenStream(null);
         }
         send('screen_share_stop', {});
-    }, [send, renegotiate]);
+    }, [send]);
 
     stopScreenShareRef.current = stopScreenShare;
 
@@ -304,11 +343,13 @@ export default function useWebRTC(send, events, sessionId) {
                 stopScreenShareRef.current?.();
             };
 
-            // Add screen track to all existing peer connections and renegotiate
+            // Add screen track to all existing peer connections.
+            // onnegotiationneeded fires automatically — no manual renegotiate needed.
+            console.log('[WebRTC] startScreenShare — peers:', Object.keys(peersRef.current));
             Object.entries(peersRef.current).forEach(([peerId, pc]) => {
                 const sender = pc.addTrack(screenTrack, stream);
                 screenSendersRef.current[peerId] = sender;
-                renegotiate(peerId);
+                console.log('[WebRTC] added screen track to peer', peerId, 'signalingState:', pc.signalingState);
             });
 
             send('screen_share_start', { userId: sessionId });
@@ -316,17 +357,14 @@ export default function useWebRTC(send, events, sessionId) {
         } catch (err) {
             console.error('Screen share failed:', err);
         }
-    }, [send, sessionId, renegotiate]);
+    }, [send, sessionId]);
 
-    // Handle signaling events from WebSocket
-    // Process ALL new events since last render (not just the last one)
+    // Handle signaling events from WebSocket — filter by __seq to survive array cap rollover
     useEffect(() => {
         if (!events.length) return;
-        const start = lastEventIdx.current;
-        // Detect if events array was trimmed (slice(-200)) — reset index
-        const idx = start > events.length ? 0 : start;
-        const newEvents = events.slice(idx);
-        lastEventIdx.current = events.length;
+        const newEvents = events.filter(e => (e.__seq ?? 0) > lastEventSeq.current);
+        if (!newEvents.length) return;
+        lastEventSeq.current = newEvents[newEvents.length - 1].__seq ?? lastEventSeq.current;
 
         for (const evt of newEvents) {
             if (evt.from === sessionId) continue; // ignore own events
@@ -341,7 +379,11 @@ export default function useWebRTC(send, events, sessionId) {
                     break;
                 }
                 case 'webrtc_offer': {
-                    const key = `${evt.from}-${evt.timestamp}`;
+                    // Use __seq (monotonic, always unique) so renegotiation offers
+                    // (e.g. screen-share added mid-call) are never silently dropped.
+                    // evt.timestamp is unreliable — server may omit it or reuse the same value.
+                    const key = `${evt.from}-${evt.__seq ?? evt.timestamp}`;
+                    console.log('[WebRTC] webrtc_offer from', evt.from, 'key:', key, 'already processed:', processedOffers.current.has(key));
                     if (processedOffers.current.has(key)) break;
                     processedOffers.current.add(key);
 
@@ -378,6 +420,12 @@ export default function useWebRTC(send, events, sessionId) {
                     closePeer(evt.from);
                     break;
                 }
+                case 'screen_share_start': {
+                    // Peer started sharing — record who is sharing so ontrack can use it
+                    console.log('[WebRTC] screen_share_start from', evt.from);
+                    setScreenSharer(evt.from);
+                    break;
+                }
                 case 'screen_share_stop': {
                     // Remote peer stopped screen share
                     setScreenSharer(prev => {
@@ -410,6 +458,7 @@ export default function useWebRTC(send, events, sessionId) {
         remoteStreams,
         screenStream,
         remoteScreenStream,
+        screenSharer,
         startMedia,
         stopMedia,
         startScreenShare,

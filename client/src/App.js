@@ -45,8 +45,8 @@ import PrincipalTeachers      from './pages/principal/PrincipalTeachers';
 import PrincipalReports       from './pages/principal/PrincipalReports';
 import PrincipalAnnouncements from './pages/principal/PrincipalAnnouncements';
 
-// EduMeet — custom video conferencing
-import EduMeet from './edumeet/EduMeet';
+// EduMeet — LiveKit-powered video conferencing
+import EduMeetLive from './edumeet/EduMeetLive';
 
 // Student Meetings
 import StudentMeetings from './pages/student/StudentMeetings';
@@ -86,7 +86,7 @@ export default function App() {
                         <Route path="/teacher/meetings"  element={<ProtectedRoute role="teacher"><TeacherMeetings /></ProtectedRoute>} />
 
                         {/* EduMeet classroom — accessible to all authenticated users */}
-                        <Route path="/classroom/:roomId" element={<ProtectedRoute><EduMeet /></ProtectedRoute>} />
+                        <Route path="/classroom/:roomId" element={<ProtectedRoute><EduMeetLive /></ProtectedRoute>} />
 
                         {/* Academic staff portal */}
                         <Route path="/staff/dashboard"   element={<ProtectedRoute role="staff"><StaffDashboard /></ProtectedRoute>} />

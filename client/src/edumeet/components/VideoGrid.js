@@ -1,27 +1,43 @@
 import React, { useRef, useEffect } from 'react';
-import { FaMicrophone, FaMicrophoneSlash, FaVideo, FaVideoSlash, FaUser } from 'react-icons/fa';
+import { FaMicrophone, FaMicrophoneSlash, FaVideo, FaVideoSlash, FaUser, FaDesktop } from 'react-icons/fa';
 
 /**
  * VideoGrid — displays local + remote video tiles in a responsive grid.
  * Background is baked into the stream via VirtualBackground processor.
  */
-export default function VideoGrid({ localStream, remoteStreams, screenStream, remoteScreenStream, micOn, camOn, participants }) {
-    const activeScreen = screenStream || remoteScreenStream;
+export default function VideoGrid({ localStream, remoteStreams, screenStream, remoteScreenStream, screenSharer, micOn, camOn, participants }) {
     return (
         <div className="edm-video-grid">
-            {/* Screen share (full-width) — local or remote */}
-            {activeScreen && (
-                <div className="edm-video-tile edm-screen-tile">
-                    <VideoElement stream={activeScreen} muted={!!screenStream} autoPlay />
-                    <div className="edm-video-label">
-                        {screenStream ? 'You are sharing' : 'Screen Share'}
-                    </div>
+            {/* Local screen share: show indicator only — rendering the stream causes
+                an infinite mirror loop when the user shares the browser tab */}
+            {screenStream && (
+                <div key="screen-local" className="edm-video-tile edm-screen-tile edm-screen-indicator">
+                    <FaDesktop className="edm-screen-indicator-icon" />
+                    <p className="edm-screen-indicator-text">You are sharing your screen</p>
+                    <p className="edm-screen-indicator-sub">Others can see your screen</p>
+                </div>
+            )}
+
+            {/* Remote screen share: show video stream when available */}
+            {!screenStream && remoteScreenStream && (
+                <div key="screen-remote" className="edm-video-tile edm-screen-tile">
+                    <VideoElement stream={remoteScreenStream} autoPlay />
+                    <div className="edm-video-label">Screen Share</div>
+                </div>
+            )}
+
+            {/* Signal received but WebRTC stream not yet arrived — show waiting banner */}
+            {!screenStream && !remoteScreenStream && screenSharer && (
+                <div key="screen-pending" className="edm-video-tile edm-screen-tile edm-screen-indicator">
+                    <FaDesktop className="edm-screen-indicator-icon" />
+                    <p className="edm-screen-indicator-text">Teacher is sharing their screen</p>
+                    <p className="edm-screen-indicator-sub">Connecting stream...</p>
                 </div>
             )}
 
             {/* Local video */}
             {localStream && (
-                <div className="edm-video-tile edm-local-tile">
+                <div key="local" className="edm-video-tile edm-local-tile">
                     <VideoElement stream={localStream} muted autoPlay mirror />
                     <div className="edm-video-label">
                         You
@@ -45,7 +61,7 @@ export default function VideoGrid({ localStream, remoteStreams, screenStream, re
                 );
             })}
 
-            {!localStream && Object.keys(remoteStreams).length === 0 && !activeScreen && (
+            {!localStream && Object.keys(remoteStreams).length === 0 && !screenStream && !remoteScreenStream && (
                 <div className="edm-video-empty">
                     <FaVideoSlash style={{ fontSize: '2rem', opacity: .3 }} />
                     <p>Camera is off. Click the camera button in the toolbar to start video.</p>

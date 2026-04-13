@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import useEdumeetSocket from './hooks/useEdumeetSocket';
@@ -28,7 +28,7 @@ export default function EduMeet() {
 
     const { events, participants, send, connected, sessionId } = useEdumeetSocket(roomId, user);
     const {
-        localStream, remoteStreams, screenStream, remoteScreenStream,
+        localStream, remoteStreams, screenStream, remoteScreenStream, screenSharer,
         startMedia, stopMedia, startScreenShare, stopScreenShare,
         toggleMic, toggleCam, micOn, camOn, closePeer,
     } = useWebRTC(send, events, sessionId);
@@ -42,6 +42,12 @@ export default function EduMeet() {
 
     const isHost = user?.role === 'teacher' || user?.role === 'principal';
     const wbAllowed = whiteboardOpen || isHost;
+
+    // Refs so event callbacks always see current values (stale-closure fix)
+    const mainViewRef = useRef(mainView);
+    const whiteboardOpenRef = useRef(whiteboardOpen);
+    useEffect(() => { mainViewRef.current = mainView; }, [mainView]);
+    useEffect(() => { whiteboardOpenRef.current = whiteboardOpen; }, [whiteboardOpen]);
 
     // When user clicks "Join Meeting" from the lobby, start media immediately
     const handleLobbyJoin = ({ micOn: wantMic, camOn: wantCam, bgId: chosenBg, stream }) => {
@@ -65,11 +71,21 @@ export default function EduMeet() {
         if (!events.length) return;
         const last = events[events.length - 1];
         if (last.from === sessionId) return; // ignore own events
-        if (last.type === 'whiteboard_permission' && !isHost) {
-            setWhiteboardOpen(last.payload?.allowed ?? false);
+
+        // Host: when a new peer connects, broadcast current view + whiteboard state so they sync
+        if (last.type === 'webrtc_ready' && isHost) {
+            send('view_change', { view: mainViewRef.current });
+            send('whiteboard_permission', { allowed: whiteboardOpenRef.current });
+            return;
         }
-        // Sync view when another user switches (whiteboard ↔ video)
-        if (last.type === 'view_change' && last.payload?.view) {
+        if (last.type === 'whiteboard_permission' && !isHost) {
+            const allowed = last.payload?.allowed ?? false;
+            setWhiteboardOpen(allowed);
+            // Auto-dismiss whiteboard view when host locks it
+            if (!allowed) setMainView('video');
+        }
+        // Only non-hosts follow host-broadcast view changes; hosts switch locally
+        if (last.type === 'view_change' && last.payload?.view && !isHost) {
             setMainView(last.payload.view);
         }
         // Host muted us
@@ -81,6 +97,12 @@ export default function EduMeet() {
             leaveRoom();
         }
     }, [events]); // eslint-disable-line react-hooks/exhaustive-deps
+
+    // Switch view locally; only the host broadcasts the change to sync all participants
+    const switchView = (view) => {
+        setMainView(view);
+        if (isHost) send('view_change', { view });
+    };
 
     const toggleHand = () => {
         send(handRaised ? 'hand_lower' : 'hand_raise', { raised: !handRaised });
@@ -108,6 +130,8 @@ export default function EduMeet() {
         const newState = !whiteboardOpen;
         setWhiteboardOpen(newState);
         send('whiteboard_permission', { allowed: newState });
+        // Locking the whiteboard sends everyone (including host) back to video
+        if (!newState) switchView('video');
     };
 
     // Counts
@@ -149,11 +173,11 @@ export default function EduMeet() {
 
                     <span className="edm-tb-sep-v" />
 
-                    {/* View toggles */}
-                    <button className={`edm-tb-btn ${mainView === 'video' ? 'active' : ''}`} onClick={() => { setMainView('video'); send('view_change', { view: 'video' }); }} title="Video view">
+                    {/* View toggles — host broadcasts, students switch locally */}
+                    <button className={`edm-tb-btn ${mainView === 'video' ? 'active' : ''}`} onClick={() => switchView('video')} title="Video view">
                         <FaVideo />
                     </button>
-                    <button className={`edm-tb-btn ${mainView === 'whiteboard' ? 'active' : ''}`} onClick={() => { setMainView('whiteboard'); send('view_change', { view: 'whiteboard' }); }} title="Whiteboard">
+                    <button className={`edm-tb-btn ${mainView === 'whiteboard' ? 'active' : ''}`} onClick={() => switchView('whiteboard')} title="Whiteboard">
                         <FaChalkboard />
                     </button>
                     {isHost && (
@@ -197,12 +221,20 @@ export default function EduMeet() {
                             remoteStreams={remoteStreams}
                             screenStream={screenStream}
                             remoteScreenStream={remoteScreenStream}
+                            screenSharer={screenSharer}
                             micOn={micOn}
                             camOn={camOn}
                             participants={participants}
                         />
                     ) : (
                         <div style={{ display:'flex', flexDirection:'column', width:'100%', height:'100%', position:'relative' }}>
+                            <button
+                                className="edm-wb-close-btn"
+                                onClick={() => isHost ? switchView('video') : setMainView('video')}
+                                title={isHost ? 'End whiteboard for everyone' : 'Back to video'}
+                            >
+                                &#8592; {isHost ? 'End Whiteboard' : 'Back to Video'}
+                            </button>
                             <Whiteboard events={events} send={send} disabled={!wbAllowed} sessionId={sessionId} />
                             {!wbAllowed && (
                                 <div className="edm-wb-locked">

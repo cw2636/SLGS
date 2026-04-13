@@ -3,35 +3,36 @@
 // ============================================================
 
 // ── Users ────────────────────────────────────────────────────
+// Passwords are NOT stored here. They live in AuthContext.js (MOCK_PASSWORDS).
 export const USERS = [
     // Students
-    { id: 1, role: 'student', username: 'james.koroma', password: 'student123',
+    { id: 1, role: 'student', username: 'james.koroma',
       name: 'James Koroma', email: 'james.koroma@slgs.edu.sl',
       studentId: 'SLGS-240101', form: 'SS 3', section: 'A', classSection: 'SS 3A', house: 'Primus', dob: '2008-05-14',
       phone: '+232 76 111 222', guardian: 'Mr. Abu Koroma', address: '12 Wilberforce St, Freetown' },
-    { id: 2, role: 'student', username: 'aminata.sesay', password: 'student123',
+    { id: 2, role: 'student', username: 'aminata.sesay',
       name: 'Aminata Sesay', email: 'aminata.sesay@slgs.edu.sl',
       studentId: 'SLGS-240102', form: 'SS 2', section: 'B', classSection: 'SS 2B', house: 'Tertius', dob: '2009-02-22',
       phone: '+232 77 333 444', guardian: 'Mrs. Fatima Sesay', address: '5 Pademba Rd, Freetown' },
 
     // Teachers
-    { id: 10, role: 'teacher', username: 'mr.conteh', password: 'teacher123',
+    { id: 10, role: 'teacher', username: 'mr.conteh',
       name: 'Mr. David Conteh', email: 'd.conteh@slgs.edu.sl',
       staffId: 'SLGS-T001', subject: 'Mathematics', qualification: 'B.Sc. (Fourah Bay)', experienceYears: 12 },
-    { id: 11, role: 'teacher', username: 'mrs.kamara', password: 'teacher123',
+    { id: 11, role: 'teacher', username: 'mrs.kamara',
       name: 'Mrs. Isatu Kamara', email: 'i.kamara@slgs.edu.sl',
       staffId: 'SLGS-T002', subject: 'English Language', qualification: 'M.A. English (USL)', experienceYears: 9 },
 
     // Academic Staff (Secretaries / Registrar)
-    { id: 30, role: 'staff', username: 'ms.johnson', password: 'staff123',
+    { id: 30, role: 'staff', username: 'ms.johnson',
       name: 'Ms. Patricia Johnson', email: 'p.johnson@slgs.edu.sl',
       staffId: 'SLGS-S001', department: 'Academic Registrar', title: 'Head of Records & Admissions' },
-    { id: 31, role: 'staff', username: 'mr.bangura', password: 'staff123',
+    { id: 31, role: 'staff', username: 'mr.bangura',
       name: 'Mr. Samuel Bangura', email: 's.bangura@slgs.edu.sl',
       staffId: 'SLGS-S002', department: 'Admissions Office', title: 'Admissions Secretary' },
 
     // Principal
-    { id: 20, role: 'principal', username: 'principal', password: 'principal123',
+    { id: 20, role: 'principal', username: 'principal',
       name: 'Rev. Canon Leonard Ken Davies', email: 'principal@slgs.edu.sl',
       title: 'School Principal', qualification: 'M.A. Th. & Min | M.A. Ed. | Dip. Th. | CELTA', since: 2018 },
 ];

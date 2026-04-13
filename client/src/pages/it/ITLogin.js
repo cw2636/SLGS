@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FaUser, FaLock, FaArrowRight, FaArrowLeft, FaNewspaper, FaImages, FaBullhorn, FaSyncAlt } from 'react-icons/fa';
 
-const IT_CREDS = { user: 'it.admin', pass: 'slgs2025' };
+const GO_API = process.env.REACT_APP_GO_API || 'http://localhost:8080';
 
 export default function ITLogin() {
     const navigate = useNavigate();
@@ -10,19 +10,28 @@ export default function ITLogin() {
     const [error, setError]     = useState('');
     const [loading, setLoading] = useState(false);
 
-    const handleSubmit = e => {
+    const handleSubmit = async e => {
         e.preventDefault();
         setError('');
         setLoading(true);
-        setTimeout(() => {
-            if (form.user === IT_CREDS.user && form.pass === IT_CREDS.pass) {
+        try {
+            const res = await fetch(`${GO_API}/api/it-auth`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ user: form.user, pass: form.pass }),
+            });
+            if (res.ok) {
                 sessionStorage.setItem('slgs_it_auth', '1');
                 navigate('/it/dashboard');
             } else {
-                setError('Invalid credentials. Please try again.');
-                setLoading(false);
+                const data = await res.json().catch(() => ({}));
+                setError(data.error || 'Invalid credentials. Please try again.');
             }
-        }, 600);
+        } catch {
+            setError('Cannot reach server. Please try again.');
+        } finally {
+            setLoading(false);
+        }
     };
 
     return (
@@ -65,11 +74,6 @@ export default function ITLogin() {
                         {loading ? 'Signing in…' : <><FaArrowRight /> Sign In</>}
                     </button>
                 </form>
-
-                <div className="auth-demo">
-                    <strong>IT Staff Credentials:</strong><br />
-                    Username: <strong>it.admin</strong> &nbsp;|&nbsp; Password: <strong>slgs2025</strong>
-                </div>
 
                 <p className="auth-link">
                     <a onClick={() => navigate('/student/login')}>Student login →</a> &nbsp;|&nbsp;

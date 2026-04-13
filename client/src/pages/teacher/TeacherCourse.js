@@ -1,12 +1,13 @@
 import React, { useState, useMemo, useRef } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import DocumentViewer from '../../components/shared/DocumentViewer';
 import {
     FaHome, FaBullhorn, FaBook, FaCalendarAlt, FaVideo, FaLink, FaFilePdf,
     FaTasks, FaClipboardList, FaChevronDown, FaChevronUp, FaExternalLinkAlt,
     FaCheckCircle, FaPlus, FaArrowLeft, FaUsers, FaThumbtack, FaSave,
     FaTrash, FaGraduationCap, FaEyeSlash, FaEye, FaUpload, FaFileAlt,
-    FaMagic, FaSpinner, FaFileWord, FaFileCsv, FaEdit,
+    FaMagic, FaSpinner, FaFileWord, FaFileCsv, FaEdit, FaDownload,
 } from 'react-icons/fa';
 import { COURSES, MODULES, COURSE_ANNOUNCEMENTS, SUBMISSIONS, CLASS_ROSTER } from '../../data/mockData';
 
@@ -36,6 +37,7 @@ export default function TeacherCourse() {
         MODULES.filter(m => m.courseId === courseId).sort((a, b) => a.order - b.order));
     const [submissions, setSubmissions] = useState(() =>
         SUBMISSIONS.filter(s => s.courseId === courseId));
+    const [viewDoc, setViewDoc] = useState(null);
 
     // Forms
     const [annForm, setAnnForm] = useState({ title:'', body:'', pinned:false });
@@ -237,6 +239,7 @@ export default function TeacherCourse() {
     );
 
     return (
+        <>
         <div style={{ display:'flex', height:'100vh', overflow:'hidden', position:'fixed', inset:0, zIndex:999, background:'var(--bg)' }}>
             {/* Course sidebar */}
             <aside style={{ width:220, flexShrink:0, background:'#1c1c1e', borderRight:'1px solid rgba(255,255,255,.08)',
@@ -579,11 +582,36 @@ export default function TeacherCourse() {
                                                     </div>
                                                     <div style={{ fontSize:'.83rem', color:'var(--text-muted)' }}>
                                                         Submitted: {sub.submittedAt}
-                                                        {sub.filePath && <span style={{ marginLeft:'10px', color:'#3b82f6' }}>📎 {sub.filePath}</span>}
                                                     </div>
+                                                    {sub.filePath && (
+                                                        <div style={{ display:'flex', alignItems:'center', gap:'.5rem', marginTop:'.5rem', padding:'.5rem .8rem', background:'var(--bg)', borderRadius:'var(--r-sm)', border:'1px solid var(--border)', fontSize:'.83rem' }}>
+                                                            <FaFileAlt style={{ color:'var(--gold)', flexShrink:0 }} />
+                                                            <span style={{ flex:1, fontWeight:500 }}>{sub.filePath}</span>
+                                                            <button className="btn btn-sm btn-outline" style={{ display:'flex', alignItems:'center', gap:'4px', padding:'2px 9px' }}
+                                                                onClick={() => setViewDoc({ title: item?.title, filename: sub.filePath, textContent: sub.textContent, studentName: sub.studentName, submittedAt: sub.submittedAt })}>
+                                                                <FaEye /> View
+                                                            </button>
+                                                            <button className="btn btn-sm btn-outline" style={{ display:'flex', alignItems:'center', gap:'4px', padding:'2px 9px' }}
+                                                                onClick={() => setViewDoc({ title: item?.title, filename: sub.filePath, textContent: sub.textContent, studentName: sub.studentName, submittedAt: sub.submittedAt, autoDownload: true })}>
+                                                                <FaDownload /> Download
+                                                            </button>
+                                                        </div>
+                                                    )}
                                                     {sub.textContent && (
                                                         <div style={{ marginTop:'.6rem', background:'var(--bg)', borderRadius:'var(--r)', padding:'.75rem 1rem', border:'1px solid var(--border)' }}>
-                                                            <div style={{ fontSize:'.72rem', fontWeight:700, color:'var(--text-muted)', textTransform:'uppercase', letterSpacing:'.05em', marginBottom:'.45rem' }}>Student's Written Submission</div>
+                                                            <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:'.45rem' }}>
+                                                                <div style={{ fontSize:'.72rem', fontWeight:700, color:'var(--text-muted)', textTransform:'uppercase', letterSpacing:'.05em' }}>Student's Written Submission</div>
+                                                                <div style={{ display:'flex', gap:'.3rem' }}>
+                                                                    <button className="btn btn-sm btn-outline" style={{ display:'flex', alignItems:'center', gap:'4px', padding:'2px 9px' }}
+                                                                        onClick={() => setViewDoc({ title: item?.title, filename: null, textContent: sub.textContent, studentName: sub.studentName, submittedAt: sub.submittedAt })}>
+                                                                        <FaEye /> View
+                                                                    </button>
+                                                                    <button className="btn btn-sm btn-outline" style={{ display:'flex', alignItems:'center', gap:'4px', padding:'2px 9px' }}
+                                                                        onClick={() => setViewDoc({ title: item?.title, filename: null, textContent: sub.textContent, studentName: sub.studentName, submittedAt: sub.submittedAt, autoDownload: true })}>
+                                                                        <FaDownload /> Download
+                                                                    </button>
+                                                                </div>
+                                                            </div>
                                                             <pre style={{ margin:0, color:'var(--text)', fontSize:'.87rem', lineHeight:1.75, whiteSpace:'pre-wrap', fontFamily:'inherit' }}>{sub.textContent}</pre>
                                                         </div>
                                                     )}
@@ -831,5 +859,7 @@ export default function TeacherCourse() {
             </div>
             </div>
         </div>
+        {viewDoc && <DocumentViewer doc={viewDoc} onClose={() => setViewDoc(null)} />}
+        </>
     );
 }
