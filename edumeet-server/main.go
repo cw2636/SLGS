@@ -51,11 +51,12 @@ func main() {
 		AllowCredentials: true,
 	}))
 
-	// WebSocket endpoint
-	r.GET("/ws/join", handlers.WSHandler(h, rm, cfg.JWTSecret))
+	// WebSocket endpoint — origin-validated
+	allowedWSOrig := cfg.CORSOrigin + ",http://localhost:3000,http://localhost:3001"
+	r.GET("/ws/join", handlers.WSHandler(h, rm, cfg.JWTSecret, allowedWSOrig))
 
 	// REST API
-	handlers.RESTHandlers(r, h, rm)
+	handlers.RESTHandlers(r, h, rm, cfg.APIKey)
 
 	// Graceful shutdown
 	go func() {

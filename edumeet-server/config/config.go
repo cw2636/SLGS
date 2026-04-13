@@ -11,6 +11,7 @@ type Config struct {
 	RedisURL   string
 	JWTSecret  string
 	CORSOrigin string
+	APIKey     string // required on mutating REST endpoints (POST/DELETE /api/rooms)
 }
 
 func Load() *Config {
@@ -29,15 +30,19 @@ func Load() *Config {
 		jwtSecret = "slgs-edumeet-dev-secret"
 	}
 
+	// CORS_ORIGIN may be a comma-separated list, e.g. "https://slgs.edu.sl,http://localhost:3001"
 	corsOrigin := os.Getenv("CORS_ORIGIN")
 	if corsOrigin == "" {
 		corsOrigin = "http://localhost:3001"
 	}
+
+	apiKey := os.Getenv("EDUMEET_API_KEY")
 
 	return &Config{
 		Port:       port,
 		RedisURL:   redisURL,
 		JWTSecret:  jwtSecret,
 		CORSOrigin: corsOrigin,
+		APIKey:     apiKey,
 	}
 }

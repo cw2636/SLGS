@@ -3,6 +3,7 @@ package handlers
 
 import (
 	"net/http"
+	"strings"
 
 	"edumeet-server/auth"
 	"edumeet-server/hub"
@@ -13,16 +14,35 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-var upgrader = websocket.Upgrader{
-	ReadBufferSize:  1024,
-	WriteBufferSize: 1024,
-	CheckOrigin: func(r *http.Request) bool {
-		return true // CORS handled by gin middleware
-	},
+// makeUpgrader returns a WebSocket upgrader that only allows connections from
+// known origins. allowedOrigins is a comma-separated list (or a single value).
+func makeUpgrader(allowedOrigins string) websocket.Upgrader {
+	origins := strings.Split(allowedOrigins, ",")
+	for i := range origins {
+		origins[i] = strings.TrimSpace(origins[i])
+	}
+	return websocket.Upgrader{
+		ReadBufferSize:  1024,
+		WriteBufferSize: 1024,
+		CheckOrigin: func(r *http.Request) bool {
+			origin := r.Header.Get("Origin")
+			if origin == "" {
+				return false // reject requests with no origin header
+			}
+			for _, o := range origins {
+				if strings.EqualFold(origin, o) {
+					return true
+				}
+			}
+			log.Warn().Str("origin", origin).Msg("WebSocket origin rejected")
+			return false
+		},
+	}
 }
 
 // WSHandler upgrades HTTP to WebSocket for a classroom session.
-func WSHandler(h *hub.Hub, rm *rooms.Manager, jwtSecret string) gin.HandlerFunc {
+func WSHandler(h *hub.Hub, rm *rooms.Manager, jwtSecret, allowedOrigins string) gin.HandlerFunc {
+	upgrader := makeUpgrader(allowedOrigins)
 	return func(c *gin.Context) {
 		roomID := c.Query("room")
 		token := c.Query("token")
@@ -37,20 +57,21 @@ func WSHandler(h *hub.Hub, rm *rooms.Manager, jwtSecret string) gin.HandlerFunc 
 		if token != "" {
 			claims, err := auth.ValidateToken(token, jwtSecret)
 			if err != nil {
-				log.Warn().Err(err).Msg("invalid token, using guest")
+				log.Warn().Err(err).Msg("invalid token, using guest identity")
 				userID = "guest-" + c.ClientIP()
-				name = "Guest"
-				role = "student"
+				name = c.DefaultQuery("name", "Guest")
+				role = "student" // never trust role from URL params on token failure
 			} else {
 				userID = claims.UserID
 				name = claims.Name
 				role = claims.Role
 			}
 		} else {
-			// Dev mode: allow anonymous connections with query params
+			// No token: allow connection but cap role at student regardless of URL param.
+			// This prevents privilege escalation (e.g. ?role=teacher) in demo/dev mode.
 			userID = c.DefaultQuery("user_id", "guest-"+c.ClientIP())
 			name = c.DefaultQuery("name", "Guest")
-			role = c.DefaultQuery("role", "student")
+			role = "student" // SECURITY: never accept role from unauthenticated URL params
 		}
 
 		// Ensure room exists

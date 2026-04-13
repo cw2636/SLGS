@@ -17,7 +17,7 @@ const (
 	writeWait  = 10 * time.Second
 	pongWait   = 60 * time.Second
 	pingPeriod = (pongWait * 9) / 10
-	maxMsgSize = 8192
+	maxMsgSize = 131072 // 128 KB — WebRTC SDPs with screen-share + camera can exceed 8 KB
 )
 
 // Client represents a single WebSocket connection.
